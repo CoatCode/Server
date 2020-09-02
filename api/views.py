@@ -51,6 +51,9 @@ class customLoginView (GenericAPIView) :
         if not user.is_verified :
             return Response({'message': '이메일 인증을 먼저 해주세요.'}, status=401)
 
+        if not user.is_active :
+            return Response({'message': '계정이 비활성화 되었습니다. 관리자에게 문의하세요.'}, status=401)
+
         token = RefreshToken.for_user(user)
 
         data = {
