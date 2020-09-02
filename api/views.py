@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 import jwt
+from datetime import datetime, timedelta
 
 class customSignUpView (GenericAPIView) :
     serializer_class = customRegisterSerializer
@@ -34,9 +35,34 @@ class customSignUpView (GenericAPIView) :
         
         return Response({'message': '이메일을 확인하세요'}, status=201)
 
-class customLoginView (TokenObtainPairView) :
+class customLoginView (GenericAPIView) :
     serializer_class = customLoginSerializer
-        
+
+    def post (self, request) :
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try :
+            user = User.objects.get(email=serializer.data['email'])
+
+        except User.DoesNotExist :
+            return Response({'message': '아이디 또는 비밀번호를 확인해주세요.'}, status=401)
+
+        if not user.is_verified :
+            return Response({'message': '이메일 인증을 먼저 해주세요.'}, status=401)
+
+        token = RefreshToken.for_user(user)
+
+        data = {
+            'token_type': 'Bearer',
+            'access_token': str(token.access_token),
+            'expired_at': str(datetime.now() + timedelta(hours=6)),
+            'refresh_token': str(token),
+            'refresh_token_expires_at': str(datetime.now() + timedelta(days=30))
+        }
+
+        return Response(data, status=200)
+
 class customRefreshView (TokenRefreshView) :
     serializer_class = customTokenRefreshSerializer
 

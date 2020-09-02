@@ -57,26 +57,18 @@ class customRegisterSerializer (serializers.ModelSerializer) :
     def create (self, validate_data) :
         return User.objects.create_user(**validate_data)
 
-class customLoginSerializer (TokenObtainPairSerializer) :
+class customLoginSerializer (serializers.ModelSerializer) :
+    email = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=999, min_length=8, write_only=True)
+
+    class Meta :
+        model = User
+        fields = ['email', 'password']
 
     def validate (self, attrs) :
-        data = super().validate(attrs)
-        refresh = self.get_token(self.user)
+        email = attrs.get('email', '')
 
-        del(data['refresh'])
-        del(data['access'])
-
-        if not self.user.is_verified :
-            data['message'] = '이메일 인증 먼저 해주세요'
-            return data
-
-        data['token_type'] = 'Bearer'
-        data['access_token'] = str(refresh.access_token)
-        data['expires_at'] = str(datetime.now() + timedelta(hours=6))
-        data['refresh_token'] = str(refresh)
-        data['refresh_token_expires_at'] = str(datetime.now() + timedelta(days=30))
-
-        return data
+        return attrs
 
 class customTokenRefreshSerializer (TokenRefreshSerializer) :
 
