@@ -21,8 +21,9 @@ class customSignUpView (GenericAPIView) :
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        user = User.objects.get(email=serializer.data['email'])
 
+        user = User.objects.get(email=serializer.data['email'])
+        
         token = RefreshToken.for_user(user).access_token
 
         current_site = get_current_site(request).domain
