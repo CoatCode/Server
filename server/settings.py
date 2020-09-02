@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'api',
     'feed',
+    'corsheader'
     'rest_framework',
     'drf_yasg',
     'rest_framework.authtoken',
@@ -131,6 +132,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
