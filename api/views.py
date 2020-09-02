@@ -4,7 +4,7 @@ from .serializers import customRegisterSerializer, customLoginSerializer, custom
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from django.urls import reverse
@@ -33,7 +33,7 @@ class customSignUpView (GenericAPIView) :
         data = {'email_body': email_body, 'to_email': user.email, 'email_subject': 'Verify your email'}
         Util.send_email(data)
         
-        return Response({'message': '이메일을 확인하세요'}, status=201)
+        return Response({'message': '이메일을 확인하세요.'}, status=201)
 
 class customLoginView (GenericAPIView) :
     serializer_class = customLoginSerializer
@@ -66,8 +66,28 @@ class customLoginView (GenericAPIView) :
 
         return Response(data, status=200)
 
-class customRefreshView (TokenRefreshView) :
+class customRefreshView (GenericAPIView) :
     serializer_class = customTokenRefreshSerializer
+
+    def post (self, request) :
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try :
+            token = RefreshToken(serializer.data['refresh'])
+
+        except :
+            return Response({'message': '잘못된 refresh token 입니다.'}, status=401)
+
+        data = {
+            'token_type': 'Bearer',
+            'access_token': str(token.access_token),
+            'expired_at': str(datetime.now() + timedelta(minutes=30)),
+            'refresh_token': str(token),
+            'refresh_token_expires_at': str(datetime.now() + timedelta(hours=8))
+        }
+
+        return Response(data, status=200)
 
 class VerifyEmail (GenericAPIView) :
 

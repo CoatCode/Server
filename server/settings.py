@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'api',
     'feed',
-    'corsheader'
+    'corsheaders',
     'rest_framework',
     'drf_yasg',
     'rest_framework.authtoken',
@@ -183,5 +183,5 @@ JWT_AUTH = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(horus=8),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(hours=8),
 }
