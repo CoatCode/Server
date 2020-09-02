@@ -56,9 +56,9 @@ class customLoginView (GenericAPIView) :
         data = {
             'token_type': 'Bearer',
             'access_token': str(token.access_token),
-            'expired_at': str(datetime.now() + timedelta(hours=6)),
+            'expired_at': str(datetime.now() + timedelta(minutes=30)),
             'refresh_token': str(token),
-            'refresh_token_expires_at': str(datetime.now() + timedelta(days=30))
+            'refresh_token_expires_at': str(datetime.now() + timedelta(hours=8))
         }
 
         return Response(data, status=200)

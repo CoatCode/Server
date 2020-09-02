@@ -78,9 +78,9 @@ class customTokenRefreshSerializer (TokenRefreshSerializer) :
 
         data['token_type'] = 'Bearer'
         data['access_token'] = str(refresh.access_token)
-        data['expires_at'] = str(datetime.now() + timedelta(hours=6))
+        data['expires_at'] = str(datetime.now() + timedelta(minutes=30))
         data['refresh_token'] = str(refresh)
-        data['refresh_token_expires_at'] = str(datetime.now() + timedelta(days=30))
+        data['refresh_token_expires_at'] = str(datetime.now() + timedelta(hours=8))
         
         del(data['access'])
 
