@@ -47,10 +47,10 @@ class customLoginView (GenericAPIView) :
             user = User.objects.get(email=serializer.data['email'])
 
         except User.DoesNotExist :
-            return Response({'message': '아이디 또는 비밀번호를 확인해주세요.'}, status=401)
+            return Response({'message': '이메일 또는 비밀번호를 확인해주세요.'}, status=401)
 
         if user.check_password(raw_password=serializer.data['password']) == False :
-            return Response({'message': '아이디 또는 비밀번호를 확인해주세요.'}, status=401)
+            return Response({'message': '이메일 또는 비밀번호를 확인해주세요.'}, status=401)
 
         if not user.is_verified :
             return Response({'message': '이메일 인증을 먼저 해주세요.'}, status=401)
