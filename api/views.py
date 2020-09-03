@@ -23,7 +23,7 @@ class customSignUpView (GenericAPIView) :
         serializer.save()
 
         user = User.objects.get(email=serializer.data['email'])
-        
+
         token = RefreshToken.for_user(user).access_token
 
         current_site = get_current_site(request).domain
@@ -47,6 +47,9 @@ class customLoginView (GenericAPIView) :
             user = User.objects.get(email=serializer.data['email'])
 
         except User.DoesNotExist :
+            return Response({'message': '아이디 또는 비밀번호를 확인해주세요.'}, status=401)
+
+        if user.check_password(raw_password=serializer.data['password']) == False :
             return Response({'message': '아이디 또는 비밀번호를 확인해주세요.'}, status=401)
 
         if not user.is_verified :
