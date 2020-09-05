@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'api',
     'feed',
+    'search',
     'corsheaders',
     'rest_framework',
     'drf_yasg',
