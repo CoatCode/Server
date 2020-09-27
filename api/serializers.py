@@ -40,7 +40,9 @@ class Base64ImageField (serializers.ImageField) :
         return extension
 
 class customRegisterSerializer (serializers.ModelSerializer) :
-    password = serializers.CharField(max_length=999, min_length=8, write_only=True)
+    email = serializers.CharField(allow_null=True)
+    password = serializers.CharField(max_length=999, min_length=8, write_only=True, allow_null=True)
+    username = serializers.CharField(allow_null=True)
     profile = Base64ImageField(use_url=True, allow_null=True)
     
     class Meta :
@@ -49,8 +51,38 @@ class customRegisterSerializer (serializers.ModelSerializer) :
 
     def validate (self, attrs) :
         email = attrs.get('email', '')
+        password = attrs.get('password', '')
         username = attrs.get('username', '')
-        profile = attrs.get('profile', '')
+        
+        error = {}
+
+        if email is None and password is None and username is None :
+            error['message'] = '이메일, 비밀번호 그리고 이름을 입력해주세요'
+            raise serializers.ValidationError(error)
+
+        if email is None and password is None :
+            error['message'] = '이메일과 비밀번호를 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if email is None and username is None :
+            error['message'] = '이메일과 이름 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if email is None and password is None :
+            error['message'] = '이메일과 비밀번호를 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if email is None :
+            error['message'] = '이메일을 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if password is None :
+            error['message'] = '비밀번호를 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if username is None :
+            error['message'] = '이름을 입력해주세요.'
+            raise serializers.ValidationError(error)
 
         return attrs
         
@@ -58,8 +90,8 @@ class customRegisterSerializer (serializers.ModelSerializer) :
         return User.objects.create_user(**validate_data)
 
 class customLoginSerializer (serializers.ModelSerializer) :
-    email = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=999, min_length=8)
+    email = serializers.CharField(allow_null=True)
+    password = serializers.CharField(max_length=999, allow_null=True)
 
     class Meta :
         model = User
@@ -78,11 +110,10 @@ class customTokenRefreshSerializer (serializers.Serializer) :
         refreshToken = attrs.get('refresh', '')
 
         return attrs
-    
 
 class userProfileSerializer (serializers.ModelSerializer) :
     profile = Base64ImageField(use_url=True)
     
     class Meta :
         model = User
-        fields = ('email', 'username', 'profile')
+        fields = ['email', 'username', 'profile']

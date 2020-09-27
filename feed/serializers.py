@@ -1,25 +1,45 @@
 from rest_framework import serializers
-from .models import post, comment
+from .models import Post, Comment, Image
+from api.models import User
 
-class commentSerializer (serializers.ModelSerializer) :
-    author = serializers.CharField(source='author.username', read_only=True)
-    
-    class Meta :
-        model = comment
-        fields = ['author', 'text']
-
-class postSerializer (serializers.ModelSerializer) :
-    author = serializers.CharField(source='author.username', read_only=True)
-    image1 = serializers.ImageField(use_url=True, allow_null=True)
-    image2 = serializers.ImageField(use_url=True, allow_null=True)
-    image3 = serializers.ImageField(use_url=True, allow_null=True)
-    image4 = serializers.ImageField(use_url=True, allow_null=True)
-    image5 = serializers.ImageField(use_url=True, allow_null=True)
-    comment = commentSerializer(many=True, read_only=True)
+class AuthorSerializer(serializers.ModelSerializer):
+    profile = serializers.ImageField(use_url=True)
 
     class Meta:
-        model = post
-        fields = ['pk', 'author', 'title', 'text', 'image1', 'image2', 'image3', 'image4', 'image5', 'like', 'liker', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'comment', 'view']
+        model = User
+        fields = ('username', 'email', 'profile')
+
+class ImageSerializer (serializers.ModelSerializer) :
+    image = serializers.ImageField(use_url=True)
+
+    class Meta :
+        model = Image
+        fields = ['image']
+
+class PostSerializer (serializers.ModelSerializer) :
+    author = AuthorSerializer(read_only=True)
+    title = serializers.CharField(allow_null=True)
+    text = serializers.CharField(allow_null=True)
+    image = ImageSerializer(many=True, read_only=True)
+    like_Cnt = serializers.IntegerField(source='liker.count', read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ['pk', 'author', 'title', 'text', 'image', 'view', 'like_Cnt', 'liker', 'tag', 'created_at']
 
     def create (self, validated_data) :
-        return post.objects.create(**validated_data)
+        images_data = self.context['request'].FILES
+        post = Post.objects.create(**validated_data)
+
+        for image_data in images_data.getlist('image') :
+            Image.objects.create(post=post, image=image_data)
+
+        return post
+
+class CommentSerializer (serializers.ModelSerializer) :
+    author = AuthorSerializer(read_only=True)
+    text = serializers.CharField(allow_null=True)
+
+    class Meta:
+        model = Comment
+        fields = ['pk', 'author', 'text', 'created_at']

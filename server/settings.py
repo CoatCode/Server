@@ -41,10 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'api',
     'feed',
-    # 'search',
     'corsheaders',
     'rest_framework',
-    'drf_yasg',
     'rest_framework.authtoken',
     'allauth',
     'allauth.account',
@@ -126,6 +124,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'Asia/Seoul'
+
+DATABASE_OPTIONS = {'charset': 'utf8'}
 
 USE_I18N = True
 

@@ -43,20 +43,29 @@ class customLoginView (GenericAPIView) :
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        if serializer.data['email'] is None and serializer.data['password'] is None :
+            return Response({'message': ['이메일과 비밀번호를 입력해주세요']}, status=401)
+
+        if serializer.data['email'] == None :
+            return Response({'message': ['이메일을 입력해주세요']}, status=401)
+
+        if serializer.data['password'] == None :
+            return Response({'message': ['비밀번호를 입력해주세요']}, status=401)
+
         try :
             user = User.objects.get(email=serializer.data['email'])
 
         except User.DoesNotExist :
-            return Response({'message': '이메일 또는 비밀번호를 확인해주세요.'}, status=401)
+            return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
 
         if user.check_password(raw_password=serializer.data['password']) == False :
-            return Response({'message': '이메일 또는 비밀번호를 확인해주세요.'}, status=401)
+            return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
 
         if not user.is_verified :
-            return Response({'message': '이메일 인증을 먼저 해주세요.'}, status=401)
+            return Response({'message': ['이메일 인증을 먼저 해주세요.']}, status=401)
 
         if not user.is_active :
-            return Response({'message': '계정이 비활성화 되었습니다. 관리자에게 문의하세요.'}, status=401)
+            return Response({'message': ['계정이 비활성화 되었습니다. 관리자에게 문의하세요.']}, status=401)
 
         token = RefreshToken.for_user(user)
 
@@ -118,7 +127,7 @@ class userProfileView (ModelViewSet) :
 
     def list (self, request) :
         queryset = User.objects.filter(email=self.request.user)
-        serializer = userProfileSerializer(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True)
 
         for i in serializer.data :
             return Response(i)
