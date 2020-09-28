@@ -12,11 +12,10 @@ class LargeResultsSetPagination(PageNumberPagination):
     page_query_param = 'page'
     max_page_size = 100
 
-    def get_paginated_response(self, data):
+    def get_paginated_response (self, data) :
         return Response(data)
 
 class CreateReadPostView (ModelViewSet) :
-    lookup_field = 'title'
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
@@ -30,15 +29,18 @@ class UpdateDeletePostView (ModelViewSet) :
     permission_classes = [IsAuthenticated, IsAuthor]
     queryset = Post.objects.all()
 
-# class CreateReadCommentView (ModelViewSet) :
-#     serializer_class = CommentSerializer
-#     permission_classes = [IsAuthenticated]
-#     queryset = Comment.objects.all()
+class CreateReadCommentView (ModelViewSet) :
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Comment.objects.all()
 
-#     def perform_create (self, serializer) :
-#         serializer.save(author=self.request.user)
+    def perform_create (self, serializer) :
+        serializer.save(author=self.request.user)
 
-# class UpdateDeletePostView (ModelViewSet) :
-#     serializer_class = CommentSerializer
-#     permission_classes = [IsAuthenticated, IsAuthor]
-#     queryset = Post.objects.all()
+    def get_queryset (self) :
+        return super().get_queryset().filter(post=self.kwargs.get('post_id'))
+
+class UpdateDeleteCommentView (ModelViewSet) :
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthor]
+    queryset = Comment.objects.all()
