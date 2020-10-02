@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import CreateReadPostView, UpdateDeletePostView, CreateReadCommentView
+from .views import CreateReadPostView, UpdateDeletePostView, CreateReadCommentView, UpdateDeleteCommentView
 from django.conf import settings
 from django.conf.urls.static import static
 

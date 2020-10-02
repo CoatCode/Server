@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
-class LargeResultsSetPagination(PageNumberPagination):
+class LargeResultsSetPagination (PageNumberPagination) :
     page_size = 15
     page_query_param = 'page'
     max_page_size = 100
@@ -22,7 +22,7 @@ class CreateReadPostView (ModelViewSet) :
     pagination_class = LargeResultsSetPagination
 
     def perform_create (self, serializer) :
-        serializer.save(author=self.request.user)
+        serializer.save(i, author=self.request.user)
 
 class UpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer

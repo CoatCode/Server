@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-class Post (models.Model):
+class Post (models.Model) :
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author', null=True)
     title = models.CharField(max_length=40, null=True)
     text = models.TextField(max_length=300, null=True)
@@ -12,6 +12,10 @@ class Post (models.Model):
 
     def __str__ (self) :
         return self.title
+
+    @property
+    def comment_count (self) :
+        return Comment.objects.filter(post=self.pk).count()        
 
 class Image (models.Model) :
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
