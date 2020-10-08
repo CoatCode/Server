@@ -3,7 +3,6 @@ from django.contrib import auth
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib import auth
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
 
