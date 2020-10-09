@@ -11,8 +11,8 @@ class UserSearchView (ModelViewSet) :
     queryset = User.objects.all()
 
     def get_queryset (self) :
-        query = self.kwargs['query']
-        queryset = self.queryset.filter(username=query)
+        query = self.request.GET.get('query')
+        queryset = self.queryset.filter(title=query)
         return queryset
 
 class PostSearchView (ModelViewSet) :
@@ -21,7 +21,6 @@ class PostSearchView (ModelViewSet) :
     queryset = Post.objects.all()
 
     def get_queryset (self) :
-        query = self.request.GET.get('query', '')
-        print(query)
+        query = self.request.GET.get('query')
         queryset = self.queryset.filter(title=query)
         return queryset

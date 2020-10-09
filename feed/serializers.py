@@ -23,6 +23,20 @@ class CommentSerializer (serializers.ModelSerializer) :
         model = Comment
         fields = ('pk', 'author', 'text', 'created_at')
 
+    def create (self, validated_data) :
+        return Comment.objects.create(**validated_data)
+
+    def validate (self, attrs) :
+        text = attrs.get('text', '')
+
+        error ={}
+
+        if text is None :
+            error['message'] = '본문은 빈칸일 수 없습니다.'
+            serializers.ValidationError(error)
+
+        return attrs
+
 class LikeSerializer (serializers.ModelSerializer) :
     id = serializers.CharField(source='liker.pk')
     email = serializers.CharField(source='liker.email')

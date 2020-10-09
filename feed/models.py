@@ -26,7 +26,7 @@ class Image (models.Model) :
 
 class Comment (models.Model) :
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
     text = models.TextField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
 
