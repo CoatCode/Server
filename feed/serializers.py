@@ -18,13 +18,13 @@ class ImageSerializer (serializers.ModelSerializer) :
 
 class CommentSerializer (serializers.ModelSerializer) :
     author = AuthorSerializer(read_only=True)
-    
+
     class Meta :
         model = Comment
         fields = ('pk', 'author', 'text', 'created_at')
 
     def create (self, validated_data) :
-        return Comment.objects.create(**validated_data)
+        return Comment.objects.create( **validated_data)
 
     def validate (self, attrs) :
         text = attrs.get('text', '')
@@ -33,7 +33,7 @@ class CommentSerializer (serializers.ModelSerializer) :
 
         if text is None :
             error['message'] = '본문은 빈칸일 수 없습니다.'
-            serializers.ValidationError(error)
+            raise serializers.ValidationError(error)
 
         return attrs
 
@@ -56,7 +56,7 @@ class LikerSerializer (serializers.ModelSerializer) :
 
 class PostSerializer (serializers.ModelSerializer) :
     author = AuthorSerializer(read_only=True)
-    image = ImageSerializer(many=True, required=False, read_only=True)
+    image = ImageSerializer(many=True, read_only=True)
     liker = LikerSerializer(many=True, required=False)
     like_count = serializers.ReadOnlyField()
     comment_count = serializers.ReadOnlyField()
@@ -82,14 +82,14 @@ class PostSerializer (serializers.ModelSerializer) :
 
         if title is None and text is None :
             error['message'] = '제목과 본문은 빈칸일 수 없습니다.'
-            serializers.ValidationError(error)
+            raise serializers.ValidationError(error)
 
         if title is None :
             error['message'] = '제목은 빈칸일 수 없습니다.'
-            serializer.ValidationError(error)
+            raise serializer.ValidationError(error)
 
         if text is None :
             error['message'] = '본문은 빈칸일 수 없습니다.'    
-            serializer.ValidationError(error)
+            raise serializer.ValidationError(error)
 
         return attrs
