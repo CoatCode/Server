@@ -1,6 +1,9 @@
-from .models import User
+from .models import User, Follow
+from feed.models import Post
+from .permissions import IsAuthor
 from .utils import Util
-from .serializers import customRegisterSerializer, customLoginSerializer, customTokenRefreshSerializer, userProfileSerializer
+from .serializers import customRegisterSerializer, customLoginSerializer, customTokenRefreshSerializer, userProfileSerializer, FollowersSerializer, FollowingSerializer
+from feed.serializers import PostSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -42,6 +45,7 @@ class customLoginView (GenericAPIView) :
     def post (self, request) :
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
         try :
             user = User.objects.get(email=serializer.data['email'])
 
@@ -86,7 +90,7 @@ class customRefreshView (GenericAPIView) :
             token = RefreshToken(serializer.data['refresh'])
 
         except :
-            return Response({'message': '잘못된 refresh token 입니다.'}, status=401)
+            return Response({'message': ['잘못된 refresh token 입니다.']}, status=401)
 
         data = {
             'token_type': 'Bearer',
@@ -109,20 +113,60 @@ class VerifyEmail (GenericAPIView) :
             if not user.is_verified :
                 user.is_verified = True
                 user.save()
-            return Response({'message': '성공적으로 인증되었습니다'})
+            return Response({'success': '성공적으로 인증되었습니다'})
 
         except jwt.ExpiredSignatureError :
-            return Response({'message': '인증이 만료되었습니다'}, status=400)
+            return Response({'message': ['인증이 만료되었습니다']}, status=400)
         
         except jwt.exceptions.DecodeError :
-            return Response({'message': '잘못된 토큰입니다'}, status=400)
+            return Response({'message': ['잘못된 토큰입니다']}, status=400)
 
-class userProfileView (ModelViewSet) :
-    serializer_class = userProfileSerializer
+class UserFollowingView (ModelViewSet) :
     permission_classes = [IsAuthenticated]
+    serializer_class = FollowingSerializer
+    queryset = Follow.objects.all()
+
+    def get_queryset (self) :
+        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
+
+    def perform_create (self, serializer) :
+        userId = self.kwargs.get('user_id')
+        user = User.objects.get(pk=userId)
+        serializer.save(following_user_id=user, user_id=self.request.user)
+
+    def create (self, request, *args, **kwargs) :
+        super().create(request, *args, **kwargs)
+        return Response({'success': '해당 사용자를 팔로우 했습니다.'}, status=200)
+
+class UserUnfollowingView (ModelViewSet) :
+    permission_classes = [IsAuthenticated, IsAuthor]
+    serializer_class = FollowingSerializer
+    queryset = Follow.objects.all()
+
+    def get_queryset (self) :
+        return super().get_queryset().filter(following_user_id=self.kwargs.get('user_id'))
+
+    def destroy (self, request, *args, **kwargs) :
+        super().destroy(request, *args, **kwargs)
+        return Response({'success': '해당 사용자를 언팔로우 했습니다.'}, status=200)
+
+class UsersPostView (ModelViewSet) :
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostSerializer
+
+    def get_queryset (self) :
+        queryset = Post.objects.filter(author=self.request.user)
+        return queryset
+
+class UserProfileView (ModelViewSet) :
+    permission_classes = [IsAuthenticated]
+    serializer_class = userProfileSerializer
 
     def list (self, request) :
-        queryset = User.objects.get(email=self.request.user)
+        queryset = User.objects.filter(email=self.request.user)
         serializer = self.serializer_class(queryset, many=True)
 
-        return Response(serializer.data)
+        for i in serializer.data :
+            data = i
+
+        return Response(data)

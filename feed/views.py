@@ -83,7 +83,9 @@ class CreateReadLikeView (ModelViewSet) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
 
     def perform_create (self, serializer) :
-        serializer.save(author=self.request.user)
+        postId = self.kwargs.get('post_id')
+        post = Post.objects.get(pk=postId)
+        serializer.save(author=self.request.user, post=post)
 
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
@@ -114,5 +116,6 @@ class DeleteLikeView (ModelViewSet) :
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
 
-    def destroy (self, serializer) :
+    def destroy (self, request, *args, **kwargs) :
+        super().destroy(request, *args, **kwargs)
         return Response({'success': '해당 게시물의 좋아요를 취소했습니다.'}, status=200)
