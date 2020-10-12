@@ -164,10 +164,10 @@ class UsersPostView (ModelViewSet) :
     serializer_class = PostSerializer
 
     def get_queryset (self) :
-        queryset = Post.objects.filter(author=self.request.user)
+        queryset = Post.objects.filter(owner=self.kwargs.get('user_id'))
         return queryset
 
-class UserProfileView (ModelViewSet) :
+class MyProfileView (ModelViewSet) :
     permission_classes = [IsAuthenticated]
     serializer_class = userProfileSerializer
 
@@ -178,4 +178,17 @@ class UserProfileView (ModelViewSet) :
         for i in serializer.data :
             data = i
 
+        return Response(data)
+
+class UserProfileView (ModelViewSet) :
+    permission_classes = [IsAuthenticated]
+    serializer_class = userProfileSerializer
+
+    def list (self, request) :
+        queryset = User.objects.filter(id=self.kwargs.get('user_id'))
+        serializer = self.serializer_class(queryset, many=True)
+
+        for i in serializer.data :
+            data = i
+        
         return Response(data)

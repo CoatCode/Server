@@ -42,7 +42,7 @@ class customRegisterSerializer (serializers.ModelSerializer) :
     email = serializers.CharField(allow_null=True)
     password = serializers.CharField(max_length=999, min_length=8, write_only=True, allow_null=True)
     username = serializers.CharField(allow_null=True)
-    profile = Base64ImageField(use_url=True, allow_null=True)
+    profile = Base64ImageField(allow_null=True, use_url=True)
     
     class Meta :
         model = User
@@ -123,7 +123,7 @@ class customTokenRefreshSerializer (serializers.Serializer) :
         return attrs
 
 class userProfileSerializer (serializers.ModelSerializer) :
-    profile = Base64ImageField(use_url=True)
+    profile = serializers.ImageField(use_url=True)
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     

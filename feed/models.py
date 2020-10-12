@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import datetime
 
 class Post (models.Model) :
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author', null=True)
@@ -7,7 +8,7 @@ class Post (models.Model) :
     content = models.TextField(max_length=300)
     tag = models.CharField(max_length=511, null=True)
     view_count = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=datetime.now().replace(microsecond=0))
 
     def __str__ (self) :
         return self.title
