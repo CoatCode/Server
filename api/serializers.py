@@ -129,13 +129,13 @@ class userProfileSerializer (serializers.ModelSerializer) :
     
     class Meta :
         model = User
-        fields = ['email', 'username', 'profile', 'following', 'followers']
+        fields = ['id', 'email', 'username', 'profile', 'following', 'followers']
 
-    def get_following(self, obj):
+    def get_following (self, obj) :
         serializer = FollowingSerializer(obj.following.all(), many=True).data
         return len(serializer)
 
-    def get_followers(self, obj):
+    def get_followers (self, obj) :
         serializer = FollowersSerializer(obj.followers.all(), many=True).data
         return len(serializer)
 

@@ -1,6 +1,6 @@
 from .models import User, Follow
 from feed.models import Post
-from .permissions import IsAuthor
+from .permissions import IsFollower
 from .utils import Util
 from .serializers import customRegisterSerializer, customLoginSerializer, customTokenRefreshSerializer, userProfileSerializer, FollowersSerializer, FollowingSerializer
 from feed.serializers import PostSerializer
@@ -125,6 +125,7 @@ class UserFollowingView (ModelViewSet) :
     permission_classes = [IsAuthenticated]
     serializer_class = FollowingSerializer
     queryset = Follow.objects.all()
+    is_saved = False
 
     def get_queryset (self) :
         return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
@@ -132,14 +133,21 @@ class UserFollowingView (ModelViewSet) :
     def perform_create (self, serializer) :
         userId = self.kwargs.get('user_id')
         user = User.objects.get(pk=userId)
-        serializer.save(following_user_id=user, user_id=self.request.user)
+
+        if userId != self.request.user.pk :
+            serializer.save(following_user_id=user, user_id=self.request.user)
+            self.is_saved = True
 
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
+
+        if self.is_saved is False :
+            return Response({'message': ['자기 자신은 팔로우 할 수 없습니다.']}, status=400)
+            
         return Response({'success': '해당 사용자를 팔로우 했습니다.'}, status=200)
 
 class UserUnfollowingView (ModelViewSet) :
-    permission_classes = [IsAuthenticated, IsAuthor]
+    permission_classes = [IsAuthenticated, IsFollower]
     serializer_class = FollowingSerializer
     queryset = Follow.objects.all()
 
