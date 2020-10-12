@@ -57,5 +57,24 @@ class User (AbstractBaseUser, PermissionsMixin) :
 
     objects = UserManager()
 
+    @property
+    def followers_count (self) :
+        queryset = Follow.objects.filter(user_id=self.pk).count()
+        return queryset
+
+    @property
+    def followings_count (self) :
+        queryset = Follow.objects.filter(following_user_id=self.pk).count()
+        return queryset
+
     def __str__ (self) :
         return self.email
+
+class Follow (models.Model) :
+    user_id = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE, null=True)
+    following_user_id = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE, null=True)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta :
+        unique_together = ("user_id", "following_user_id")
+        ordering = ["-created"]

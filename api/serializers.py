@@ -1,9 +1,8 @@
-from .models import User
+from .models import User, Follow
 from django.contrib import auth
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib import auth
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
 
@@ -101,6 +100,18 @@ class customLoginSerializer (serializers.ModelSerializer) :
         email = attrs.get('email', '')
         password = attrs.get('password', '')
 
+        if email is None and password is None :
+            error['message'] = '이메일과 비밀번호를 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if email is None :
+            error['message'] = '이메일을 입력해주세요.'
+            raise serializers.ValidationError(error)
+
+        if password is None :
+            error['message'] = '비밀번호를 입력해주세요.'
+            raise serializers.ValidationError(error)
+
         return attrs
 
 class customTokenRefreshSerializer (serializers.Serializer) :
@@ -113,7 +124,29 @@ class customTokenRefreshSerializer (serializers.Serializer) :
 
 class userProfileSerializer (serializers.ModelSerializer) :
     profile = Base64ImageField(use_url=True)
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
     
     class Meta :
         model = User
-        fields = ['email', 'username', 'profile']
+        fields = ['id', 'email', 'username', 'profile', 'following', 'followers']
+
+    def get_following (self, obj) :
+        serializer = FollowingSerializer(obj.following.all(), many=True).data
+        return len(serializer)
+
+    def get_followers (self, obj) :
+        serializer = FollowersSerializer(obj.followers.all(), many=True).data
+        return len(serializer)
+
+class FollowingSerializer (serializers.ModelSerializer) :
+
+    class Meta :
+        model = Follow
+        fields = ("id", "following_user_id", "created")
+
+class FollowersSerializer (serializers.ModelSerializer) :
+
+    class Meta :
+        model = Follow
+        fields = ("id", "user_id", "created")

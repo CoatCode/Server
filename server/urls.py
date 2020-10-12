@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
-from api.views import userProfileView
-from rest_framework import permissions
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('api.urls')),
+    path('auth/', include('api.auth_urls')),
     path('feed/', include('feed.urls')),
-    path('user', userProfileView.as_view({'get': 'list'})),
-]
+    path('search/', include('search.urls')),
+    path('user', include('api.user_urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
