@@ -15,6 +15,7 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 import jwt
 from datetime import datetime, timedelta
+import pytz
 
 class customSignUpView (GenericAPIView) :
     serializer_class = customRegisterSerializer
@@ -72,9 +73,9 @@ class customLoginView (GenericAPIView) :
         data = {
             'token_type': 'Bearer',
             'access_token': str(token.access_token),
-            'expires_at': str(datetime.now() + timedelta(minutes=30)),
+            'expires_at': str((datetime.now() + timedelta(minutes=30)).astimezone().replace(microsecond=0).isoformat()),
             'refresh_token': str(token),
-            'refresh_token_expires_at': str(datetime.now() + timedelta(hours=8))
+            'refresh_token_expires_at': str((datetime.now() + timedelta(hours=8)).astimezone().replace(microsecond=0).isoformat())
         }
 
         return Response(data, status=200)
