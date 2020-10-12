@@ -68,7 +68,7 @@ class PostSerializer (serializers.ModelSerializer) :
         data = super().to_representation(instance)
         images = data.pop('images')
         images_array = [a.get('image') for a in images]
-        data.update({'image_url': images_array})
+        data.update({'image_urls': images_array})
         return data
 
     def validate (self, attrs) :
