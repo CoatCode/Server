@@ -1,6 +1,7 @@
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
 from django.db import models
 from django.utils import timezone
+from datetime import datetime
 
 class UserManager (BaseUserManager) :
     
@@ -49,8 +50,7 @@ class User (AbstractBaseUser, PermissionsMixin) :
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'profile']
