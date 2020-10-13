@@ -26,7 +26,7 @@ class Comment (models.Model) :
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owner', null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', null=True)
     content = models.TextField(max_length=200)
-    created_at = models.DateTimeField(default=datetime.now().replace(microsecond=0))
+    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
 
 class Like (models.Model) :
     liked_people = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
