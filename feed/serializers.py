@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import Post, Comment, Image, Like
 from api.serializers import userProfileSerializer, FollowingSerializer, FollowersSerializer
 from api.models import User, Follow
-from django.shortcuts import get_object_or_404
 
 class ImageSerializer (serializers.ModelSerializer) :
     image = serializers.ImageField(use_url=True)
@@ -39,12 +38,15 @@ class LikeSerializer (serializers.ModelSerializer) :
         model = Like
         fields = '__all__'
 
+    def create (self, validated_data) :
+        return Like.objects.create(**validated_data)
+
 class PostSerializer (serializers.ModelSerializer) :
     owner = userProfileSerializer(read_only=True)
     like_count = serializers.ReadOnlyField()
     comment_count = serializers.ReadOnlyField()
     images = ImageSerializer(read_only=True, many=True)
-    liked_people = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    liked_people = LikeSerializer(many=True, read_only=True)
 
     class Meta :
         model = Post
@@ -67,8 +69,10 @@ class PostSerializer (serializers.ModelSerializer) :
     def to_representation (self, instance) :
         data = super().to_representation(instance)
         images = data.pop('images')
-        images_array = [a.get('image') for a in images]
-        data.update({'image_urls': images_array})
+        liked_people = data.pop('liked_people')
+        images_array = [image.get('image') for image in images]
+        liked_people_array = [liked_person.get('liked_people') for liked_person in liked_people]
+        data.update({'image_urls': images_array, 'liked_people': liked_people_array})
         return data
 
     def validate (self, attrs) :

@@ -8,10 +8,7 @@ class Post (models.Model) :
     content = models.TextField(max_length=300)
     tag = models.CharField(max_length=511, null=True)
     view_count = models.IntegerField(default=0)
-    created_at = models.DateTimeField(default=datetime.now().replace(microsecond=0))
-
-    def __str__ (self) :
-        return self.title
+    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
 
     @property
     def comment_count (self) :

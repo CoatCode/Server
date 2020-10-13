@@ -7,6 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from django.http import HttpResponseRedirect
 
 class LargeResultsSetPagination (PageNumberPagination) :
     page_size = 15
@@ -79,6 +80,7 @@ class CreateReadLikeView (ModelViewSet) :
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
     queryset = Like.objects.all()
+    is_saved = False
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
@@ -86,20 +88,34 @@ class CreateReadLikeView (ModelViewSet) :
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
         post = Post.objects.get(pk=postId)
-        serializer.save(liked_people=self.request.user, post=post)
+
+        try :
+            like = self.queryset.get(post=post, liked_people=self.request.user)
+
+        except Like.DoesNotExist :
+            serializer.save(liked_people=self.request.user, post=post)
+            self.is_saved = True
 
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
-        return Response({'success': '해당 게시물을 좋아요 했습니다.'}, status=200)
+        
+        if self.is_saved is True :
+            self.is_saved = False
+            return Response({'success': '해당 게시물을 좋아요 했습니다.'}, status=200)
+
+        return Response({'message': ['이미 해당 게시물을 좋아요 하였습니다.']}, status=400)
 
     def list (self, request, *args, **kwargs) :
-        try :
-            like = self.queryset.get(liked_people=self.request.user)
+        postId = self.kwargs.get('post_id')
+        post = Post.objects.get(pk=postId)
 
-        except like.DoesNotExist :
+        try :
+            like = self.queryset.get(post=post, liked_people=self.request.user)
+
+        except Like.DoesNotExist :
             return Response({'message': ['좋아요 하지 않음.']}, status=400)
 
-        return Response({'success': '좋아요함'}, status=200)
+        return Response({'success': '좋아요함.'}, status=200)
 
 class ReadLikerView (ModelViewSet) :
     serializer_class = userProfileSerializer
@@ -116,8 +132,8 @@ class ReadLikerView (ModelViewSet) :
         for liker in likers :
             userId = liker.get('liked_people_id')
             user = User.objects.filter(pk=userId)
-            serializer = self.serializer_class(user, many=True).data
-            data.append(serializer[0])
+            serializer = self.serializer_class(user, many=True)
+            data.append(serializer.data[0])
 
         return Response(data)
 
