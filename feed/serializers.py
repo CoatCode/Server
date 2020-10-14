@@ -58,7 +58,7 @@ class PostSerializer (serializers.ModelSerializer) :
         
         for i in range(1, 6) :
             image_data = images_data.get(F'image{i}')
-
+            print(F'image{i}')
             if image_data is None :
                 break
 
