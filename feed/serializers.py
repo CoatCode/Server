@@ -78,6 +78,7 @@ class PostSerializer (serializers.ModelSerializer) :
     def validate (self, attrs) :
         title = attrs.get('title', '')
         content = attrs.get('text', '')
+        tag = attrs.get('tag', '')
 
         error = {}
 
@@ -87,10 +88,10 @@ class PostSerializer (serializers.ModelSerializer) :
 
         if title is None :
             error['message'] = '제목은 빈칸일 수 없습니다.'
-            raise serializer.ValidationError(error)
+            raise serializers.ValidationError(error)
 
         if content is None :
             error['message'] = '본문은 빈칸일 수 없습니다.'    
-            raise serializer.ValidationError(error)
+            raise serializers.ValidationError(error)
 
         return attrs

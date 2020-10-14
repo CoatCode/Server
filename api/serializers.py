@@ -14,7 +14,7 @@ class Base64ImageField (serializers.ImageField) :
         import six
         import uuid
 
-        if isinstance(data, six.string_types):
+        if isinstance (data, six.string_types) :
             if 'data:' in data and ';base64,' in data:
                 header, data = data.split(';base64,')
 
