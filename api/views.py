@@ -54,12 +54,12 @@ class customLoginView (GenericAPIView) :
             return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
 
         if user.check_password(raw_password=serializer.data['password']) == False :
-            serializer.data['password'].upper()
+            up = serializer.data['password'].upper()
 
-            if user.check_password(raw_password=serializer.data['password']) == False :
-                serializer.data['password'].lower()
+            if user.check_password(raw_password=up) == False :
+                down=serializer.data['password'].lower()
                 
-                if user.check_password(raw_password=serializer.data['password']) == False :
+                if user.check_password(raw_password=down) == False :
                     return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
 
         if not user.is_verified :
@@ -146,6 +146,66 @@ class UserFollowingView (ModelViewSet) :
             return Response({'message': ['자기 자신은 팔로우 할 수 없습니다.']}, status=400)
             
         return Response({'success': '해당 사용자를 팔로우 했습니다.'}, status=200)
+
+    def list (self, request, *args, **kwargs) :
+        userId = self.kwargs.get('user_id')
+        user = User.objects.get(pk=userId)
+
+        try :
+            following = self.queryset.get(following_user_id=user)
+
+        except Follow.DoesNotExist :
+            return Response({'message': ['팔로우 하지 않음.']}, status=400)
+
+        return Response({'success': '팔로우함.'}, status=200)
+
+class FollowersView (ModelViewSet) :
+    serializer_class = userProfileSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Follow.objects.all()
+
+    def get_queryset (self) :
+        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
+
+    def list (self, request, *args, **kwargs) :
+        followers = self.queryset.filter(following_user_id=self.kwargs.get('user_id')).values()
+        data = []
+
+        for follower in followers :
+            userId = follower.get('user_id_id')
+            user = User.objects.filter(pk=userId)
+            serializer = self.serializer_class(user, many=True)
+
+            if serializer.data == [] :
+                break
+
+            data.append(serializer.data[0])
+
+        return Response(data)
+
+class FollowingsView (ModelViewSet) :
+    serializer_class = userProfileSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Follow.objects.all()
+
+    def get_queryset (self) :
+        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
+
+    def list (self, request, *args, **kwargs) :
+        followers = self.queryset.filter(user_id=self.kwargs.get('user_id')).values()
+        data = []
+
+        for follower in followers :
+            userId = follower.get('following_user_id_id')
+            user = User.objects.filter(pk=userId)
+            serializer = self.serializer_class(user, many=True)
+
+            if serializer.data == [] :
+                break
+
+            data.append(serializer.data[0])
+
+        return Response(data)
 
 class UserUnfollowingView (ModelViewSet) :
     permission_classes = [IsAuthenticated, IsFollower]

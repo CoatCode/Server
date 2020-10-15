@@ -8,7 +8,7 @@ class Post (models.Model) :
     content = models.TextField(max_length=300)
     tag = models.CharField(max_length=511, null=True)
     view_count = models.IntegerField(default=0)
-    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
+    created_at = models.CharField(default=str(datetime.now().astimezone().replace(microsecond=0).isoformat()), max_length=60)
 
     @property
     def comment_count (self) :
@@ -26,7 +26,7 @@ class Comment (models.Model) :
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owner', null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', null=True)
     content = models.TextField(max_length=200)
-    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
+    created_at = models.CharField(default=str(datetime.now().astimezone().replace(microsecond=0).isoformat()), max_length=60)
 
 class Like (models.Model) :
     liked_people = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
