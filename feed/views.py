@@ -60,6 +60,22 @@ class CreateReadCommentView (ModelViewSet) :
         super().create(request, *args, **kwargs)
         return Response({'success': '댓글이 저장 되었습니다.'}, status=201)
 
+    def list (self, request, *args, **kwargs) :
+        postId = self.kwargs.get('post_id')
+        post = Post.objects.get(pk=postId)
+
+        data_serializer = PostSerializer(post)
+        data = data_serializer.data
+        
+        post_serializer = PostSerializer(data=data)
+        post_serializer.is_valid(raise_exception=True)
+        post_serializer.save(view_count=data['view_count']+1)
+
+        comments = Comment.objects.filter(post=postId)
+        serializer = self.serializer_class(comments, many=True)
+        
+        return Response(serializer.data)
+
 class UpdateDeleteCommentView (ModelViewSet) :
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsOwner]

@@ -50,7 +50,7 @@ class User (AbstractBaseUser, PermissionsMixin) :
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
-    created_at = models.DateTimeField(default=datetime.now().astimezone().replace(microsecond=0).isoformat())
+    created_at = models.CharField(default=str(datetime.now().astimezone().replace(microsecond=0).isoformat()), max_length=60)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'profile']

@@ -176,8 +176,10 @@ class FollowersView (ModelViewSet) :
             user = User.objects.filter(pk=userId)
             serializer = self.serializer_class(user, many=True)
 
-            if serializer.data != [] :
-                data.append(serializer.data[0])
+            if serializer.data == [] :
+                break
+
+            data.append(serializer.data[0])
 
         return Response(data)
 
@@ -198,8 +200,10 @@ class FollowingsView (ModelViewSet) :
             user = User.objects.filter(pk=userId)
             serializer = self.serializer_class(user, many=True)
 
-            if serializer.data != [] :
-                data.append(serializer.data[0])
+            if serializer.data == [] :
+                break
+
+            data.append(serializer.data[0])
 
         return Response(data)
 
