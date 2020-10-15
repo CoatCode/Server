@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Post, Comment, Image, Like
 from api.serializers import userProfileSerializer, FollowingSerializer, FollowersSerializer
 from api.models import User, Follow
+from datetime import datetime
 
 class ImageSerializer (serializers.ModelSerializer) :
     image = serializers.ImageField(use_url=True)
@@ -19,7 +20,7 @@ class CommentSerializer (serializers.ModelSerializer) :
         fields = ('comment_id', 'owner', 'content', 'created_at')
 
     def create (self, validated_data) :
-        return Comment.objects.create(**validated_data)
+        return Comment.objects.create(**validated_data, created_at=str(datetime.now().astimezone().replace(microsecond=0).isoformat()))
 
     def validate (self, attrs) :
         text = attrs.get('text', '')
@@ -54,7 +55,7 @@ class PostSerializer (serializers.ModelSerializer) :
 
     def create (self, validated_data) :
         images_data = self.context['request'].FILES
-        post = Post.objects.create(**validated_data)
+        post = Post.objects.create(**validated_data, created_at=str(datetime.now().astimezone().replace(microsecond=0).isoformat()))
         
         for i in range(1, 6) :
             image_data = images_data.get(F'image{i}')

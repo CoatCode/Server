@@ -51,7 +51,7 @@ class CreateReadCommentView (ModelViewSet) :
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
         post = Post.objects.get(pk=postId)
-        serializer.save(owner=self.request.user, post=post)
+        serializer.save(owner=self.request.user, post=post, created_at=str(datetime.now().astimezone().replace(microsecond=0).isoformat()))
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
