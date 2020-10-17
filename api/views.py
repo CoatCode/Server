@@ -15,7 +15,6 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 import jwt
 from datetime import datetime, timedelta
-import pytz
 
 class customSignUpView (GenericAPIView) :
     serializer_class = customRegisterSerializer
