@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.http import HttpResponseRedirect
+from django.contrib.sites.shortcuts import get_current_site
 
 class LargeResultsSetPagination (PageNumberPagination) :
     page_size = 15
@@ -51,7 +52,7 @@ class CreateReadCommentView (ModelViewSet) :
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
         post = Post.objects.get(pk=postId)
-        serializer.save(owner=self.request.user, post=post, created_at=str(datetime.now().astimezone().replace(microsecond=0).isoformat()))
+        serializer.save(owner=self.request.user, post=post)
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
@@ -166,3 +167,5 @@ class DeleteLikeView (ModelViewSet) :
     def destroy (self, request, *args, **kwargs) :
         super().destroy(request, *args, **kwargs)
         return Response({'success': '해당 게시물의 좋아요를 취소했습니다.'}, status=200)
+
+        #When a request is received from the CreateReadLikeView, you try to activate this view.
