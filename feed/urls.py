@@ -8,7 +8,7 @@ urlpatterns = [
     path('post/<int:post_id>/comment', CreateReadCommentView.as_view({'post': 'create'})),
     path('post/<int:post_id>/comments', CreateReadCommentView.as_view({'get': 'list'})),
     path('post/<int:post_id>/comment/<int:pk>', UpdateDeleteCommentView.as_view({'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})),
-    path('post/<int:post_id>/like', CreateReadLikeView.as_view({'post': 'create', 'get': 'list', 'delete': 'destroy'})),
+    path('post/<int:post_id>/like', CreateReadLikeView.as_view({'post': 'create', 'get': 'list'})),
     path('post/<int:post_id>/like/<int:pk>', DeleteLikeView.as_view({'delete': 'destroy'})),
     path('post/<int:post_id>/like-people', ReadLikerView.as_view({'get': 'list'}))
 ]
