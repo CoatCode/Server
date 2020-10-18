@@ -126,6 +126,8 @@ class ReadLikerView (ModelViewSet) :
         return Response(data)
 
 class LikeView (APIView) :
+    permission_classes = [IsAuthenticated]
+
     def post (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
         serializer = LikeSerializer(data=request.data)
