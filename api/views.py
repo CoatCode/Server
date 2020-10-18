@@ -4,6 +4,7 @@ from .permissions import IsFollower
 from .utils import Util
 from .serializers import customRegisterSerializer, customLoginSerializer, customTokenRefreshSerializer, userProfileSerializer, FollowersSerializer, FollowingSerializer
 from feed.serializers import PostSerializer
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -121,43 +122,6 @@ class VerifyEmail (GenericAPIView) :
         except jwt.exceptions.DecodeError :
             return Response({'message': ['잘못된 토큰입니다']}, status=400)
 
-class UserFollowingView (ModelViewSet) :
-    permission_classes = [IsAuthenticated]
-    serializer_class = FollowingSerializer
-    queryset = Follow.objects.all()
-    is_saved = False
-
-    def get_queryset (self) :
-        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
-
-    def perform_create (self, serializer) :
-        userId = self.kwargs.get('user_id')
-        user = User.objects.get(pk=userId)
-
-        if userId != self.request.user.pk :
-            serializer.save(following_user_id=user, user_id=self.request.user)
-            self.is_saved = True
-
-    def create (self, request, *args, **kwargs) :
-        super().create(request, *args, **kwargs)
-
-        if self.is_saved is False :
-            return Response({'message': ['자기 자신은 팔로우 할 수 없습니다.']}, status=400)
-            
-        return Response({'success': '해당 사용자를 팔로우 했습니다.'}, status=200)
-
-    def list (self, request, *args, **kwargs) :
-        userId = self.kwargs.get('user_id')
-        user = User.objects.get(pk=userId)
-
-        try :
-            following = self.queryset.get(following_user_id=user)
-
-        except Follow.DoesNotExist :
-            return Response({'message': ['팔로우 하지 않음.']}, status=400)
-
-        return Response({'success': '팔로우함.'}, status=200)
-
 class FollowersView (ModelViewSet) :
     serializer_class = userProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -217,6 +181,48 @@ class UserUnfollowingView (ModelViewSet) :
     def destroy (self, request, *args, **kwargs) :
         super().destroy(request, *args, **kwargs)
         return Response({'success': '해당 사용자를 언팔로우 했습니다.'}, status=200)
+
+class FollowView (APIView) :
+    def post (self, request, user_id) :
+        user = User.objects.get(pk=user_id)
+        serializer = FollowingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try :
+            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+
+        except Follow.DoesNotExist :
+            if user != self.request.user :
+                serializer.save(following_user_id=user, user_id=self.request.user)
+                return Response({'success': '해당 유저를 팔로우 했습니다.'}, status=200)
+            return Response({'message': ['자기 자신은 팔로우할 수 없습니다.']}, status=200)
+
+        return Response({'message': ['이미 팔로우 한 유저입니다.']}, status=400)
+
+    def get (self, request, user_id) :
+        user = User.objects.get(pk=user_id)
+
+        try :
+            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+
+        except Follow.DoesNotExist :
+            return Response({'message': ['팔로우하지 않음.']}, status=200)
+
+        return Response({'success': '팔로우함.'}, status=400)
+
+    
+    def delete (self, request, user_id) :
+        user = User.objects.get(pk=user_id)
+
+        try :
+            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+
+        except Follow.DoesNotExist :
+            return Response({'message': ['해당 유저를 팔로우 하지 않았습니다.']}, status=200)
+
+        follow.delete()
+
+        return Response({'success': '해당 유저를 언팔로우 하였습니다.'}, status=200)
 
 class UsersPostView (ModelViewSet) :
     permission_classes = [IsAuthenticated]

@@ -19,11 +19,10 @@ class LargeResultsSetPagination (PageNumberPagination) :
     def get_paginated_response (self, data) :
         return Response(data)
 
-class CreateReadPostView (ModelViewSet) :
+class CreatePostView (ModelViewSet) :
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
-    pagination_class = LargeResultsSetPagination
 
     def perform_create (self, serializer) :
         serializer.save(owner=self.request.user)
@@ -31,6 +30,15 @@ class CreateReadPostView (ModelViewSet) :
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
         return Response({'success': '게시물이 저장 되었습니다.'}, status=201)
+
+class ReadListPostView (ModelViewSet) :
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    pagination_class = LargeResultsSetPagination
+
+class ReadOnePostView (ModelViewSet) :
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
 class UpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer
@@ -45,7 +53,7 @@ class UpdateDeletePostView (ModelViewSet) :
         super().destroy(request, *args, **kwargs)
         return Response({'success': '게시물이 삭제 되었습니다.'}, status=200)
 
-class CreateReadCommentView (ModelViewSet) :
+class CreateCommentView (ModelViewSet) :
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
@@ -62,6 +70,10 @@ class CreateReadCommentView (ModelViewSet) :
         super().create(request, *args, **kwargs)
         serializer = self.serializer_class(data=request.data)
         return Response({'success': '댓글 작성이 완료되었습니다.'}, status=201)
+
+class ReadCommentView (ModelViewSet) :
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
 
     def list (self, request, *args, **kwargs) :
         postId = self.kwargs.get('post_id')
@@ -90,47 +102,6 @@ class UpdateDeleteCommentView (ModelViewSet) :
     def destroy (self, request, *args, **kwargs) :
         super().destroy(request, *args, **kwargs)
         return Response({'success': '댓글이 삭제 되었습니다.'}, status=200)
-
-class CreateReadLikeView (ModelViewSet) :
-    serializer_class = LikeSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = Like.objects.all()
-    is_saved = False
-
-    def get_queryset (self) :
-        return super().get_queryset().filter(post=self.kwargs.get('post_id'))
-
-    def perform_create (self, serializer) :
-        postId = self.kwargs.get('post_id')
-        post = Post.objects.get(pk=postId)
-
-        try :
-            like = self.queryset.get(post=post, liked_people=self.request.user)
-
-        except Like.DoesNotExist :
-            serializer.save(liked_people=self.request.user, post=post)
-            self.is_saved = True
-
-    def create (self, request, *args, **kwargs) :
-        super().create(request, *args, **kwargs)
-        
-        if self.is_saved is True :
-            self.is_saved = False
-            return Response({'success': '해당 게시물을 좋아요 했습니다.'}, status=200)
-
-        return Response({'message': ['이미 해당 게시물을 좋아요 하였습니다.']}, status=400)
-
-    def list (self, request, *args, **kwargs) :
-        postId = self.kwargs.get('post_id')
-        post = Post.objects.get(pk=postId)
-
-        try :
-            like = self.queryset.get(post=post, liked_people=self.request.user)
-
-        except Like.DoesNotExist :
-            return Response({'message': ['좋아요 하지 않음.']}, status=400)
-
-        return Response({'success': '좋아요함.'}, status=200)
 
 class ReadLikerView (ModelViewSet) :
     serializer_class = userProfileSerializer
