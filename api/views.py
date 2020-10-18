@@ -183,6 +183,8 @@ class UserUnfollowingView (ModelViewSet) :
         return Response({'success': '해당 사용자를 언팔로우 했습니다.'}, status=200)
 
 class FollowView (APIView) :
+    permission_classes = [IsAuthenticated]
+
     def post (self, request, user_id) :
         user = User.objects.get(pk=user_id)
         serializer = FollowingSerializer(data=request.data)
