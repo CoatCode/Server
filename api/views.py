@@ -227,7 +227,6 @@ class FollowView (APIView) :
         return Response({'success': '해당 유저를 언팔로우 하였습니다.'}, status=200)
 
 class UsersPostView (ModelViewSet) :
-    permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
 
     def get_queryset (self) :
