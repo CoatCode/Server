@@ -1,11 +1,12 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 
 class Post (models.Model) :
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='author', null=True)
     title = models.CharField(max_length=40)
     content = models.TextField(max_length=300)
-    tag = models.CharField(max_length=511, null=True)
+    tag = ArrayField(models.CharField(max_length=255), null=True)
     view_count = models.IntegerField(default=0)
     created_at = models.CharField(max_length=60, null=True)
 

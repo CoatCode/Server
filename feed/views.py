@@ -8,8 +8,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from django.http import HttpResponseRedirect
-from django.contrib.sites.shortcuts import get_current_site
 
 class LargeResultsSetPagination (PageNumberPagination) :
     page_size = 15
