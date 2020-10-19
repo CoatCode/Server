@@ -138,7 +138,7 @@ class LikeView (APIView) :
 
         except Like.DoesNotExist :
             serializer.save(liked_people=self.request.user, post=post)
-            return Response({'success': '해당 게시글에 좋아요를 눌렀습니다.'}, status=201)
+            return Response({'success': '해당 게시글에 좋아요를 눌렀습니다.'}, status=200)
 
         return Response({'message': ['이미 좋아요를 누른 게시물 입니다.']}, status=400)
 

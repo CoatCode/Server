@@ -91,11 +91,14 @@ WSGI_APPLICATION = 'server.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'coco',
+        'USER': 'admin',
+        'PASSWORD': 'kiop7777',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -169,16 +172,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'teamdaedo'
 
 EMAIL_HOST_PASSWORD = 'daedo123'
-
-JWT_AUTH = {
-   'JWT_SECRET_KEY' : SECRET_KEY,
-   'JWT_ALGORITHM' : 'HS256',
-   'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=6),
-   'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=30),
-   'JWT_EXPIRATION_DELTA' : datetime.timedelta(hours=6),
-   'JWT_ALLOW_REFRESH' : True,
-   'JWT_REFRESH_EXPIRATION_DELTA' : datetime.timedelta(days=30),
-}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
