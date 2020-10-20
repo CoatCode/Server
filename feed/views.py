@@ -153,10 +153,9 @@ class LikeView (APIView) :
     
     def delete (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
-        user = User.objects.get(email=self.request.user)
 
         try :
-            like = Like.objects.get(post=post, liked_people=user)
+            like = Like.objects.get(post=post, liked_people=self.request.user)
 
         except Like.DoesNotExist :
             return Response({'message': ['해당 게시글에 좋아요 되어 있지 않습니다.']}, status=400)
