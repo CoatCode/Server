@@ -1,20 +1,18 @@
 from .models import User, Follow
 from django.contrib import auth
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
 
 class customRegisterSerializer (serializers.ModelSerializer) :
     email = serializers.CharField(allow_null=True)
     password = serializers.CharField(max_length=999, min_length=8, write_only=True, allow_null=True)
     username = serializers.CharField(allow_null=True)
-    profile = serializers.ImageField(allow_null=True, use_url=True)
+    image = serializers.ImageField(use_url=True)
     
     class Meta :
         model = User
-        fields = ['email', 'username', 'profile', 'password']
+        fields = ['email', 'username', 'image', 'password']
 
     def validate (self, attrs) :
         email = attrs.get('email', '')
@@ -91,13 +89,13 @@ class customTokenRefreshSerializer (serializers.Serializer) :
         return attrs
 
 class userProfileSerializer (serializers.ModelSerializer) :
-    profile = serializers.ImageField(use_url=True)
+    image = serializers.ImageField(use_url=True)
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     
     class Meta :
         model = User
-        fields = ['id', 'email', 'username', 'profile', 'following', 'followers']
+        fields = ['id', 'email', 'username', 'image', 'following', 'followers']
 
     def get_following (self, obj) :
         serializer = FollowingSerializer(obj.following.all(), many=True).data
