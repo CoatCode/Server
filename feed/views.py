@@ -103,7 +103,6 @@ class UpdateDeleteCommentView (ModelViewSet) :
 
 class ReadLikerView (ModelViewSet) :
     serializer_class = userProfileSerializer
-    permission_classes = [IsAuthenticated]
     queryset = Like.objects.all()
 
     def get_queryset (self) :
