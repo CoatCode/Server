@@ -83,7 +83,7 @@ class PostSerializer (serializers.ModelSerializer) :
 
         if comments_array != [] :
             if len(comments_array) == 1 or len(comments_array) == 2:
-                data.update({'image_urls': images_array, 'liked_people': liked_people_array, 'comments_preview': comments_array})
+                data.update({'image_urls': images_array, 'liked_people': liked_people_array, 'comment_preview': comments_array})
 
             else :
                 comments_preview_array = []
