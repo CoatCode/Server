@@ -49,7 +49,7 @@ class PostSerializer (serializers.ModelSerializer) :
     comment_count = serializers.ReadOnlyField()
     images = ImageSerializer(read_only=True, many=True)
     liked_people = LikeSerializer(many=True, read_only=True)
-    tag = serializers.ListField(child=serializers.CharField())
+    tag = serializers.ListField(child=serializers.CharField(), allow_null=True)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta :
@@ -72,9 +72,11 @@ class PostSerializer (serializers.ModelSerializer) :
 
     def to_representation (self, instance) :
         data = super().to_representation(instance)
+
         images = data.pop('images')
         liked_people = data.pop('liked_people')
         comments = data.pop('comments')
+
         images_array = [image.get('image') for image in images]
         liked_people_array = [liked_person.get('liked_people') for liked_person in liked_people]
         comments_array = [comment for comment in comments]
@@ -91,7 +93,7 @@ class PostSerializer (serializers.ModelSerializer) :
                     comments_array.remove(random_comment)
                     comments_preview_array.append(random_comment)
 
-                data.update({'image_urls': images_array, 'liked_people': liked_people_array, 'comments_preview': comments_preview_array})
+                data.update({'image_urls': images_array, 'liked_people': liked_people_array, 'comment_preview': comments_preview_array})
                     
         else :
             data.update({'image_urls': images_array, 'liked_people': liked_people_array})

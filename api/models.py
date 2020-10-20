@@ -46,13 +46,13 @@ class UserManager (BaseUserManager) :
 class User (AbstractBaseUser, PermissionsMixin) :
     username = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.CharField(max_length=255, unique=True, db_index=True)
-    profile = models.ImageField(default='media\default_image.jpeg', blank=True, null=True)
+    image = models.ImageField(default='D:\school\대회 및 프로젝트\CoCo\media\default_image.jpeg', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'profile']
+    REQUIRED_FIELDS = ['username', 'image']
 
     objects = UserManager()
 
