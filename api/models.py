@@ -5,7 +5,7 @@ from datetime import datetime
 
 class UserManager (BaseUserManager) :
     
-    def create_user (self, username, email, profile, password=None) :
+    def create_user (self, username, email, image, password=None) :
 
         if username is None :
             raise TypeError('Users should have a username')
@@ -16,7 +16,7 @@ class UserManager (BaseUserManager) :
         user = self.model(
             username=username,
             email=self.normalize_email(email),
-            profile=profile,
+            image=image,
         )
         
         user.set_password(password)
@@ -24,7 +24,7 @@ class UserManager (BaseUserManager) :
         
         return user
 
-    def create_superuser (self, username, email, profile, password=None) :
+    def create_superuser (self, username, email, image, password=None) :
 
         if password is None :
             raise TypeError('Password should not be none')
@@ -32,7 +32,7 @@ class UserManager (BaseUserManager) :
         user = self.create_user(
             username,
             email,
-            profile,
+            image,
             password
         )
         
