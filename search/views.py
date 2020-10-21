@@ -10,7 +10,7 @@ class UserSearchView (ModelViewSet) :
 
     def get_queryset (self) :
         query = self.request.GET.get('query')
-        queryset = self.queryset.filter(title=query)
+        queryset = self.queryset.filter(username=query)
         return queryset
 
 class PostSearchView (ModelViewSet) :
