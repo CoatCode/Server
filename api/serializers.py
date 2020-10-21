@@ -8,7 +8,7 @@ class customRegisterSerializer (serializers.ModelSerializer) :
     email = serializers.CharField(allow_null=True)
     password = serializers.CharField(max_length=999, min_length=8, write_only=True, allow_null=True)
     username = serializers.CharField(allow_null=True)
-    image = serializers.ImageField(use_url=True)
+    image = serializers.ImageField(use_url=True, required=False)
     
     class Meta :
         model = User

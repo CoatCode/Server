@@ -49,7 +49,7 @@ class PostSerializer (serializers.ModelSerializer) :
     comment_count = serializers.ReadOnlyField()
     images = ImageSerializer(read_only=True, many=True)
     liked_people = LikeSerializer(many=True, read_only=True)
-    tag = serializers.ListField(child=serializers.CharField(), allow_null=True)
+    tag = serializers.ListField(child=serializers.CharField(), allow_null=True, required=False)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta :
