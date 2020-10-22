@@ -21,6 +21,28 @@ class customRegisterSerializer (serializers.ModelSerializer) :
         
         error = {}
 
+        try :
+            check_email = User.objects.get(email=email)
+        except User.DoesNotExist :
+            check_email = None
+        
+        try :
+            check_username = User.objects.get(username=username)
+        except User.DoesNotExist :
+            check_username = None
+
+        if check_email is not None and check_username is not None :
+            error['message'] = '이미 존재하는 이메일과 이름 입니다.'
+            raise serializers.ValidationError(error)
+
+        if check_email is not None :
+            error['message'] = '이미 존재하는 이메일 입니다.'
+            raise serializers.ValidationError(error)
+
+        if check_username is not None :
+            error['message'] = '이미 존재하는 이름 입니다.'
+            raise serializers.ValidationError(error)
+
         if email is None and password is None and username is None :
             error['message'] = '이메일, 비밀번호 그리고 이름을 입력해주세요'
             raise serializers.ValidationError(error)
