@@ -38,7 +38,7 @@ class customSignUpView (GenericAPIView) :
         data = {'email_body': email_body, 'to_email': user.email, 'email_subject': 'Verify your email'}
         Util.send_email(data)
         
-        return Response({'message': '이메일을 확인하세요.'}, status=201)
+        return Response({'success': '이메일을 확인하세요.'}, status=201)
 
 class customLoginView (GenericAPIView) :
     serializer_class = customLoginSerializer
