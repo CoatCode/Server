@@ -29,10 +29,20 @@ class CreatePostView (ModelViewSet) :
         super().create(request, *args, **kwargs)
         return Response({'success': '게시물이 저장 되었습니다.'}, status=201)
 
-class ReadListPostView (ModelViewSet) :
+class ReadAllListPostView (ModelViewSet) :
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     pagination_class = LargeResultsSetPagination
+
+class ReadPopularListPostView (ModelViewSet) :
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    pagination_class = LargeResultsSetPagination
+
+    def list (self, request, *args, **kwargs) :
+        likes = Like.objects.all().values()
+
+        return Response([])
 
 class ReadOnePostView (ModelViewSet) :
     serializer_class = PostSerializer
@@ -95,7 +105,7 @@ class UpdateDeleteCommentView (ModelViewSet) :
     def update (self, request, *args, **kwargs) :
         super().update(request, *args, **kwargs)
         serializer = self.serializer_class(data=request.data)
-        return Response({'success': '댓글 작성이 완료되었습니다.'}, status=200)
+        return Response({'success': '댓글 수정이 완료되었습니다.'}, status=200)
 
     def destroy (self, request, *args, **kwargs) :
         super().destroy(request, *args, **kwargs)
