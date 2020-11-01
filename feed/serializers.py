@@ -103,7 +103,6 @@ class PostSerializer (serializers.ModelSerializer) :
     def validate (self, attrs) :
         title = attrs.get('title', '')
         content = attrs.get('text', '')
-        tag = attrs.get('tag', '')
 
         error = {}
 
