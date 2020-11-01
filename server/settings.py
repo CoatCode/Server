@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 't#h=&(-fm=82)-#5dlp$fdc^ohenn4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'coatcode.herokuapp.com']
 
 AUTH_USER_MODEL = 'api.User'
 
@@ -147,12 +147,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = "os.path.join(BASE_DIR, 'static')"
-
-STATICFILES_DIR = [
-    os.path.join(PROJECT_ROOT, 'static'),
-]
-
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage' 
 
 MEDIA_URL = '/media/'
 
