@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import Count
 
 class LargeResultsSetPagination (PageNumberPagination) :
     page_size = 15
@@ -40,9 +41,9 @@ class ReadPopularListPostView (ModelViewSet) :
     pagination_class = LargeResultsSetPagination
 
     def list (self, request, *args, **kwargs) :
-        likes = Like.objects.all().values()
-
-        return Response([])
+        post = Post.objects.annotate(number_of_like=Count('liked_people'))
+        serializer = self.serializer_class(post, many=True)
+        return Response(serializer.data)
 
 class ReadOnePostView (ModelViewSet) :
     serializer_class = PostSerializer
@@ -159,7 +160,6 @@ class LikeView (APIView) :
             return Response({'message': ['좋아요 하지 않음.']}, status=400)
 
         return Response({'success': '좋아요함'}, status=200)
-
     
     def delete (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
