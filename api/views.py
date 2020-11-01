@@ -247,7 +247,6 @@ class MyProfileView (ModelViewSet) :
         return Response(data)
 
 class UserProfileView (ModelViewSet) :
-    permission_classes = [IsAuthenticated]
     serializer_class = userProfileSerializer
 
     def list (self, request) :
