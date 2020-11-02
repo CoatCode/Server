@@ -90,7 +90,7 @@ class ReadCommentView (ModelViewSet) :
         post.view_count = post.view_count + 1
         post.save(update_fields=('view_count', ))
 
-        comments = Comment.objects.filter(post=postId)
+        comments = self.queryset.filter(post=postId)
         serializer = self.serializer_class(comments, many=True)
         
         return Response(serializer.data)
@@ -114,7 +114,7 @@ class UpdateDeleteCommentView (ModelViewSet) :
 
 class ReadLikerView (ModelViewSet) :
     serializer_class = userProfileSerializer
-    queryset = Like.objects.all().order_by('pk')
+    queryset = Like.objects.all()
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
@@ -125,7 +125,7 @@ class ReadLikerView (ModelViewSet) :
 
         for liker in likers :
             userId = liker.get('liked_people_id')
-            user = User.objects.filter(pk=userId)
+            user = User.objects.filter(pk=userId).order_by('pk')
             serializer = self.serializer_class(user, many=True)
             
             if serializer.data != [] :
