@@ -32,7 +32,7 @@ class CreatePostView (ModelViewSet) :
 
 class ReadAllListPostView (ModelViewSet) :
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-pk')
     pagination_class = LargeResultsSetPagination
 
 class ReadPopularListPostView (ModelViewSet) :
@@ -82,7 +82,7 @@ class CreateCommentView (ModelViewSet) :
 
 class ReadCommentView (ModelViewSet) :
     serializer_class = CommentSerializer
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().order_by('pk')
 
     def list (self, request, *args, **kwargs) :
         postId = self.kwargs.get('post_id')
@@ -114,7 +114,7 @@ class UpdateDeleteCommentView (ModelViewSet) :
 
 class ReadLikerView (ModelViewSet) :
     serializer_class = userProfileSerializer
-    queryset = Like.objects.all()
+    queryset = Like.objects.all().order_by('pk')
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
