@@ -88,6 +88,8 @@ class customLoginSerializer (serializers.ModelSerializer) :
         email = attrs.get('email', '')
         password = attrs.get('password', '')
 
+        error = {}
+
         if email is None and password is None :
             error['message'] = '이메일과 비밀번호를 입력해주세요.'
             raise serializers.ValidationError(error)
