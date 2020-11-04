@@ -208,9 +208,9 @@ class FollowView (APIView) :
             follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
 
         except Follow.DoesNotExist :
-            return Response({'message': ['팔로우하지 않음.']}, status=200)
+            return Response({'message': ['팔로우하지 않음.']}, status=400)
 
-        return Response({'success': '팔로우함.'}, status=400)
+        return Response({'success': '팔로우함.'}, status=200)
 
     
     def delete (self, request, user_id) :
