@@ -113,13 +113,13 @@ class customTokenRefreshSerializer (serializers.Serializer) :
         return attrs
 
 class userProfileSerializer (serializers.ModelSerializer) :
-    image = serializers.ImageField(use_url=True)
+    image = serializers.ImageField(use_url=True, read_only=True)
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
     
     class Meta :
         model = User
-        fields = ['id', 'email', 'username', 'image', 'following', 'followers']
+        fields = ('id', 'email', 'username', 'image', 'description', 'following', 'followers')
 
     def get_following (self, obj) :
         serializer = FollowingSerializer(obj.following.all(), many=True).data
