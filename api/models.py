@@ -47,6 +47,7 @@ class User (AbstractBaseUser, PermissionsMixin) :
     username = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.CharField(max_length=255, unique=True, db_index=True)
     image = models.ImageField(default='D:\school\대회 및 프로젝트\CoCo\media\default_image.jpeg', blank=True, null=True)
+    description = models.CharField(max_length=255, default=F'안녕하세요. {username}입니다.')
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
@@ -55,16 +56,6 @@ class User (AbstractBaseUser, PermissionsMixin) :
     REQUIRED_FIELDS = ['username', 'image']
 
     objects = UserManager()
-
-    @property
-    def followers_count (self) :
-        queryset = Follow.objects.filter(user_id=self.pk).count()
-        return queryset
-
-    @property
-    def followings_count (self) :
-        queryset = Follow.objects.filter(following_user_id=self.pk).count()
-        return queryset
 
     def __str__ (self) :
         return self.email
