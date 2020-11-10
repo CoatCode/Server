@@ -227,21 +227,19 @@ class MyProfileView (ModelViewSet) :
 
     def list (self, request) :
         queryset = User.objects.filter(email=self.request.user)
-        serializer = self.serializer_class(queryset, many=True)
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
 
-        for i in serializer.data :
-            data = i
-
-        return Response(data)
+        return Response(serializer.data[0])
 
 class UserProfileView (ModelViewSet) :
     serializer_class = userProfileSerializer
 
-    def list (self, request) :
-        queryset = User.objects.filter(id=self.kwargs.get('user_id'))
-        serializer = self.serializer_class(queryset, many=True)
-
-        for i in serializer.data :
-            data = i
+    def list (self, request, *args, **kwargs) :
+        queryset = User.objects.filter(id=kwargs.get('user_id'))
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
         
-        return Response(data)
+        try :
+            return Response(serializer.data[0])
+
+        except IndexError :
+            return Response({'message': ['존재하지 않는 유저입니다.']}, status=400)
