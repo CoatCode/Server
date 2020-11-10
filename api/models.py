@@ -5,7 +5,7 @@ from datetime import datetime
 
 class UserManager (BaseUserManager) :
     
-    def create_user (self, username, email, image, password=None) :
+    def create_user (self, username, email, image, description, password=None) :
 
         if username is None :
             raise TypeError('Users should have a username')
@@ -17,6 +17,7 @@ class UserManager (BaseUserManager) :
             username=username,
             email=self.normalize_email(email),
             image=image,
+            description=description
         )
         
         user.set_password(password)
@@ -33,7 +34,8 @@ class UserManager (BaseUserManager) :
             username,
             email,
             image,
-            password
+            password,
+            description,
         )
         
         user.is_admin = True
@@ -47,13 +49,13 @@ class User (AbstractBaseUser, PermissionsMixin) :
     username = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.CharField(max_length=255, unique=True, db_index=True)
     image = models.ImageField(default='D:\school\대회 및 프로젝트\CoCo\media\default_image.jpeg', blank=True, null=True)
-    description = models.CharField(max_length=255, default=F'안녕하세요. {username}입니다.')
+    description = models.CharField(max_length=255, null=True)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'image']
+    REQUIRED_FIELDS = ['username', 'image', 'description']
 
     objects = UserManager()
 
