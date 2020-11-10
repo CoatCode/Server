@@ -170,18 +170,6 @@ class FollowingsView (ModelViewSet) :
 
         return Response(data)
 
-class UserUnfollowingView (ModelViewSet) :
-    permission_classes = [IsAuthenticated, IsFollower]
-    serializer_class = FollowingSerializer
-    queryset = Follow.objects.all()
-
-    def get_queryset (self) :
-        return super().get_queryset().filter(following_user_id=self.kwargs.get('user_id'))
-
-    def destroy (self, request, *args, **kwargs) :
-        super().destroy(request, *args, **kwargs)
-        return Response({'success': '해당 사용자를 언팔로우 했습니다.'}, status=200)
-
 class FollowView (APIView) :
     permission_classes = [IsAuthenticated]
 
@@ -197,7 +185,7 @@ class FollowView (APIView) :
             if user != self.request.user :
                 serializer.save(following_user_id=user, user_id=self.request.user)
                 return Response({'success': '해당 유저를 팔로우 했습니다.'}, status=200)
-            return Response({'message': ['자기 자신은 팔로우할 수 없습니다.']}, status=200)
+            return Response({'message': ['자기 자신은 팔로우할 수 없습니다.']}, status=400)
 
         return Response({'message': ['이미 팔로우 한 유저입니다.']}, status=400)
 
@@ -220,7 +208,7 @@ class FollowView (APIView) :
             follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
 
         except Follow.DoesNotExist :
-            return Response({'message': ['해당 유저를 팔로우 하지 않았습니다.']}, status=200)
+            return Response({'message': ['해당 유저를 팔로우 하지 않았습니다.']}, status=400)
 
         follow.delete()
 
