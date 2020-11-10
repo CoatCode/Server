@@ -42,7 +42,7 @@ class ReadPopularListPostView (ModelViewSet) :
 
     def list (self, request, *args, **kwargs) :
         post = Post.objects.annotate(number_of_like=Count('liked_people'))
-        serializer = self.serializer_class(post, many=True)
+        serializer = self.serializer_class(post, many=True, context={'request': request})
         return Response(serializer.data)
 
 class ReadOnePostView (ModelViewSet) :
@@ -91,7 +91,7 @@ class ReadCommentView (ModelViewSet) :
         post.save(update_fields=('view_count', ))
 
         comments = self.queryset.filter(post=postId)
-        serializer = self.serializer_class(comments, many=True)
+        serializer = self.serializer_class(comments, many=True, context={'request': request})
         
         return Response(serializer.data)
 
