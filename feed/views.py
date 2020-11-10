@@ -1,5 +1,5 @@
 from .models import Post, Comment, Image, Like
-from api.models import User
+from api.models import User, Follow
 from api.serializers import userProfileSerializer
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from .permissions import *
@@ -41,9 +41,28 @@ class ReadPopularListPostView (ModelViewSet) :
     pagination_class = LargeResultsSetPagination
 
     def list (self, request, *args, **kwargs) :
-        post = Post.objects.annotate(number_of_like=Count('liked_people'))
+        post = self.queryset.annotate(number_of_likes=Count('liked_people')).order_by('-number_of_likes')
         serializer = self.serializer_class(post, many=True, context={'request': request})
         return Response(serializer.data)
+
+class ReadFollowingPostView (ModelViewSet) :
+    serializer_class = PostSerializer
+    queryset = Post.objects.all().order_by('-pk')
+    permission_classes = [IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
+
+    def list (self, request, *args, **kwargs) :
+        data = []
+        followings = Follow.objects.filter(user_id=self.request.user)
+
+        for following in followings :
+            post = self.queryset.filter(owner=following.following_user_id)
+            serializers = self.serializer_class(post, many=True, context={'request': request})
+            
+            for serializer in serializers.data :
+                data.append(serializer)
+
+        return Response(data)
 
 class ReadOnePostView (ModelViewSet) :
     serializer_class = PostSerializer
