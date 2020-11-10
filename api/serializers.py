@@ -74,6 +74,11 @@ class customRegisterSerializer (serializers.ModelSerializer) :
         return attrs
         
     def create (self, validate_data) :
+        image = validate_data.get('image', None)
+        if image is None :
+            validate_data.update({'image': None})
+        username = validate_data['username']
+        validate_data.update({'description': F'안녕하세요. {username}입니다.'})
         return User.objects.create_user(**validate_data)
 
 class customLoginSerializer (serializers.ModelSerializer) :
