@@ -38,8 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'cloudinary',
     'api',
     'feed',
     'search',
@@ -55,6 +57,14 @@ REST_FRAMEWORK = {
 
     'DEFAULT_SCHEMA_CLASS':'rest_framework.schemas.coreapi.AutoSchema',
 }
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'hhodugv6q',
+    'API_KEY': '344363898916237',
+    'API_SECRET': '9V2A6TBkcTvrtUYqwPJBkUMeE6E',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -162,8 +172,6 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-
-SITE_ID = 2
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 
