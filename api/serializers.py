@@ -76,7 +76,7 @@ class customRegisterSerializer (serializers.ModelSerializer) :
     def create (self, validate_data) :
         image = validate_data.get('image', None)
         if image is None :
-            validate_data.update({'image': 'api\\main_profile_picture.png'})
+            validate_data.update({'image': 'main_profile_picture.png'})
         username = validate_data['username']
         validate_data.update({'description': F'안녕하세요. {username}입니다.'})
         return User.objects.create_user(**validate_data)
