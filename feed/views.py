@@ -96,7 +96,6 @@ class CreateCommentView (ModelViewSet) :
 
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
-        serializer = self.serializer_class(data=request.data)
         return Response({'success': '댓글 작성이 완료되었습니다.'}, status=201)
 
 class ReadCommentView (ModelViewSet) :
@@ -124,7 +123,6 @@ class UpdateDeleteCommentView (ModelViewSet) :
 
     def update (self, request, *args, **kwargs) :
         super().update(request, *args, **kwargs)
-        serializer = self.serializer_class(data=request.data)
         return Response({'success': '댓글 수정이 완료되었습니다.'}, status=200)
 
     def destroy (self, request, *args, **kwargs) :
