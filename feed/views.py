@@ -74,7 +74,7 @@ class ReadFollowingPostView (ModelViewSet) :
 
         return Response(data)
 
-class UpdateDeletePostView (ModelViewSet) :
+class ReadOneUpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Post.objects.all()
