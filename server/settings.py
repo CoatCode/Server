@@ -190,5 +190,5 @@ EMAIL_HOST_PASSWORD = 'daedo123'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(weeks=1),
 }
