@@ -74,16 +74,7 @@ class ReadFollowingPostView (ModelViewSet) :
 
         return Response(data)
 
-class ReadOnePostView (ModelViewSet) :
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-
-    def get_serializer_context (self) :
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
-
-class UpdateDeletePostView (ModelViewSet) :
+class ReadOneUpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Post.objects.all()
@@ -219,4 +210,4 @@ class LikeView (APIView) :
 
         like.delete()
 
-        return Response({'success': '해당 게시글에 대한 좋아요가 취소 되었습니다.'}, status=200)
+        return Response({'success': '해당 게시글에 대한 좋아요가 취소 되었습니다.'}, status=200) 
