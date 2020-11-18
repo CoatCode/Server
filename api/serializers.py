@@ -15,9 +15,9 @@ class customRegisterSerializer (serializers.ModelSerializer) :
         fields = ['email', 'username', 'image', 'password']
 
     def validate (self, attrs) :
-        email = attrs.get('email', '')
-        password = attrs.get('password', '')
-        username = attrs.get('username', '')
+        email = attrs.get('email', None)
+        password = attrs.get('password', None)
+        username = attrs.get('username', None)
         
         error = {}
 
