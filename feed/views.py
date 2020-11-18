@@ -23,6 +23,11 @@ class CreatePostView (ModelViewSet) :
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
 
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def perform_create (self, serializer) :
         serializer.save(owner=self.request.user)
 
@@ -34,6 +39,11 @@ class ReadAllListPostView (ModelViewSet) :
     serializer_class = PostSerializer
     queryset = Post.objects.all().order_by('-pk')
     pagination_class = LargeResultsSetPagination
+
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 class ReadPopularListPostView (ModelViewSet) :
     serializer_class = PostSerializer
@@ -68,10 +78,20 @@ class ReadOnePostView (ModelViewSet) :
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 class UpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Post.objects.all()
+
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def update (self, request, *args, **kwargs) :
         super().update(request, *args, **kwargs)
@@ -85,6 +105,11 @@ class CreateCommentView (ModelViewSet) :
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
+
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
@@ -118,6 +143,11 @@ class UpdateDeleteCommentView (ModelViewSet) :
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Comment.objects.all()
 
+    def get_serializer_context (self) :
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
 
@@ -143,7 +173,7 @@ class ReadLikerView (ModelViewSet) :
         for liker in likers :
             userId = liker.get('liked_people_id')
             user = User.objects.filter(pk=userId).order_by('pk')
-            serializer = self.serializer_class(user, many=True)
+            serializer = self.serializer_class(user, many=True, context={'request': request})
             
             if serializer.data != [] :
                 data.append(serializer.data[0])
@@ -155,7 +185,7 @@ class LikeView (APIView) :
 
     def post (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
-        serializer = LikeSerializer(data=request.data)
+        serializer = LikeSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         try :
