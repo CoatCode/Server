@@ -76,7 +76,7 @@ class ReadFollowingPostView (ModelViewSet) :
 
 class ReadOneUpdateDeletePostView (ModelViewSet) :
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsOwnerOrReadOnly]
     queryset = Post.objects.all()
 
     def get_serializer_context (self) :
