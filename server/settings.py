@@ -151,7 +151,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ORIGIN_WHITELIST = ('coatcode.herokuapp.com', )
+CORS_ORIGIN_WHITELIST = ('https://coatcode.herokuapp.com', )
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
