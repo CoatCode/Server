@@ -48,7 +48,7 @@ class UserManager (BaseUserManager) :
 class User (AbstractBaseUser, PermissionsMixin) :
     username = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.CharField(max_length=255, unique=True, db_index=True)
-    image = models.ImageField(default='D:\school\대회 및 프로젝트\CoCo\media\default_image.jpeg', blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
     description = models.CharField(max_length=255, null=True)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -61,7 +61,7 @@ class User (AbstractBaseUser, PermissionsMixin) :
 
     def __str__ (self) :
         return self.email
-
+        
 class Follow (models.Model) :
     user_id = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE, null=True)
     following_user_id = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE, null=True)
