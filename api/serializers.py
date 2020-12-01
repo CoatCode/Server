@@ -1,6 +1,8 @@
 from .models import User, Follow
 from django.contrib import auth
+from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, timedelta
 
@@ -81,41 +83,41 @@ class customRegisterSerializer (serializers.ModelSerializer) :
         validate_data.update({'description': F'안녕하세요. {username}입니다.'})
         return User.objects.create_user(**validate_data)
 
-class customLoginSerializer (serializers.ModelSerializer) :
-    email = serializers.CharField(allow_null=True)
-    password = serializers.CharField(max_length=999, allow_null=True)
-
-    class Meta :
-        model = User
-        fields = ['email', 'password']
+class customLoginSerializer (serializers.Serializer) :
+    email = serializers.CharField(max_length=64)
+    password = serializers.CharField(max_length=128, write_only=True)
 
     def validate (self, attrs) :
-        email = attrs.get('email', '')
-        password = attrs.get('password', '')
+        token = RefreshToken.for_user
 
-        error = {}
+        email = attrs.get('email', None)
+        password = attrs.get('password', None)
 
-        if email is None and password is None :
-            error['message'] = '이메일과 비밀번호를 입력해주세요.'
-            raise serializers.ValidationError(error)
+        try :
+            user = User.objects.get(email=email)
 
-        if email is None :
-            error['message'] = '이메일을 입력해주세요.'
-            raise serializers.ValidationError(error)
+        except User.DoesNotExist :
+            raise AuthenticationFailed('이메일 또는 비밀번호를 확인해주세요.')
 
-        if password is None :
-            error['message'] = '비밀번호를 입력해주세요.'
-            raise serializers.ValidationError(error)
+        if user.check_password(raw_password=password) is False :
+            up = password.upper()
+
+            if user.check_password(raw_password=up) is False :
+                down = up.lower()
+
+                if user.check_password(raw_password=down) is False :
+                    raise AuthenticationFailed('이메일 또는 비밀번호를 확인해주세요.')
+        
+        if user.is_verified is False :
+            raise AuthenticationFailed('이메일 인증을 먼저 해주세요.')
+
+        if user.is_active is False :
+            raise AuthenticationFailed('관리자에게 문의해주세요.')
 
         return attrs
 
 class customTokenRefreshSerializer (serializers.Serializer) :
     refresh = serializers.CharField(max_length=999)
-
-    def validate (self, attrs) :
-        refreshToken = attrs.get('refresh', '')
-
-        return attrs
 
 class userProfileSerializer (serializers.ModelSerializer) :
     profile = serializers.ImageField(source='image')
