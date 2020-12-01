@@ -3,6 +3,7 @@ from feed.models import Post
 from .permissions import IsFollower
 from .utils import Util
 from .serializers import *
+from .authentication import CheckJWT
 from feed.serializers import PostSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -28,7 +29,8 @@ class customSignUpView (GenericAPIView) :
 
         user = User.objects.get(email=serializer.data['email'])
 
-        token = RefreshToken.for_user(user).access_token
+        token = RefreshToken.for_user(user)
+        token['email'] = user.email
 
         current_site = get_current_site(request).domain
         relativeLink = reverse('emailVerify')
@@ -76,7 +78,9 @@ class customRefreshView (GenericAPIView) :
             token = RefreshToken(serializer.data['refresh'])
 
         except :
-            return Response({'message': ['잘못된 refresh token 입니다.']}, status=401)
+            return Response({'detail': '잘못된 refresh token 입니다.'}, status=401)
+
+        user = CheckJWT.get_user(token)
 
         data = {}
 
@@ -94,18 +98,18 @@ class VerifyEmail (GenericAPIView) :
         token = request.GET.get('token')
 
         try :
-            payload = jwt.decode(token, settings.SECRET_KEY)
-            user = User.objects.get(id=payload['user_id'])
+            user = CheckJWT.get_user(token)
+
             if not user.is_verified :
                 user.is_verified = True
                 user.save()
-            return Response({'success': '성공적으로 인증되었습니다'})
+            return Response({'success': '성공적으로 인증되었습니다.'})
 
         except jwt.ExpiredSignatureError :
-            return Response({'message': ['인증이 만료되었습니다']}, status=400)
+            return Response({'detail': '인증이 만료되었습니다.'}, status=400)
         
         except jwt.exceptions.DecodeError :
-            return Response({'message': ['잘못된 토큰입니다']}, status=400)
+            return Response({'detail': '잘못된 토큰입니다.'}, status=400)
 
 class FollowersView (ModelViewSet) :
     serializer_class = userProfileSerializer
@@ -159,41 +163,52 @@ class FollowView (APIView) :
     permission_classes = [IsAuthenticated]
 
     def post (self, request, user_id) :
-        user = User.objects.get(pk=user_id)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+
+        following_user = User.objects.get(pk=user_id)
+
         serializer = FollowingSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try :
-            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+            follow = Follow.objects.get(following_user_id=following_user, user_id=user)
 
         except Follow.DoesNotExist :
-            if user != self.request.user :
-                serializer.save(following_user_id=user, user_id=self.request.user)
+            if following_user != user :
+                serializer.save(following_user_id=following_user, user_id=user)
                 return Response({'success': '해당 유저를 팔로우 했습니다.'}, status=200)
-            return Response({'message': ['자기 자신은 팔로우할 수 없습니다.']}, status=400)
+            return Response({'detail': '자기 자신은 팔로우 할 수 없습니다.'}, status=400)
 
-        return Response({'message': ['이미 팔로우 한 유저입니다.']}, status=400)
+        return Response({'detail': '이미 팔로우 한 유저입니다.'}, status=400)
 
     def get (self, request, user_id) :
-        user = User.objects.get(pk=user_id)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+        following_user = User.objects.get(pk=user_id)
 
         try :
-            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+            follow = Follow.objects.get(following_user_id=following_user, user_id=user)
 
         except Follow.DoesNotExist :
-            return Response({'message': ['팔로우하지 않음.']}, status=400)
+            return Response({'detail': '팔로우하지 않음.'}, status=400)
 
         return Response({'success': '팔로우함.'}, status=200)
 
     
     def delete (self, request, user_id) :
-        user = User.objects.get(pk=user_id)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+        following_user = User.objects.get(pk=user_id)
 
         try :
-            follow = Follow.objects.get(following_user_id=user, user_id=self.request.user)
+            follow = Follow.objects.get(following_user_id=following_user, user_id=user)
 
         except Follow.DoesNotExist :
-            return Response({'message': ['해당 유저를 팔로우 하지 않았습니다.']}, status=400)
+            return Response({'detail': '해당 유저를 팔로우 하지 않았습니다.'}, status=400)
 
         follow.delete()
 
@@ -211,21 +226,20 @@ class MyProfileView (ModelViewSet) :
     serializer_class = userProfileSerializer
 
     def list (self, request) :
-        queryset = User.objects.filter(email=self.request.user)
-        serializer = self.serializer_class(queryset, many=True, context={'request': request})
-
         header = JWTTokenUserAuthentication.get_header(self, request=request)
         raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        validated_token = JWTTokenUserAuthentication.get_validated_token(self, raw_token=raw_token)
-        user = JWTTokenUserAuthentication.get_user(self, validated_token=validated_token)
-        return Response(serializer.data[0])
+
+        user = CheckJWT.get_user(raw_token)
+        serializer = self.serializer_class(user)
+        
+        return Response(serializer.data)
 
 class UserProfileView (ModelViewSet) :
     serializer_class = userProfileSerializer
 
     def list (self, request, *args, **kwargs) :
         queryset = User.objects.filter(id=kwargs.get('user_id'))
-        serializer = self.serializer_class(queryset, many=True, context={'request': request})
+        serializer = self.serializer_class(queryset, context={'request': request})
         
         try :
             return Response(serializer.data[0])

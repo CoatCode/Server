@@ -1,6 +1,7 @@
 from .models import Post, Comment, Image, Like
 from api.models import User, Follow
 from api.serializers import userProfileSerializer
+from api.authentication import CheckJWT
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from .permissions import *
 from rest_framework.views import APIView
@@ -8,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from django.db.models import Count
 
 class LargeResultsSetPagination (PageNumberPagination) :
@@ -29,7 +31,10 @@ class CreatePostView (ModelViewSet) :
         return context
 
     def perform_create (self, serializer) :
-        serializer.save(owner=self.request.user)
+        header = JWTTokenUserAuthentication.get_header(self, request=self.request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+        serializer.save(owner=user)
 
     def create (self, request, *args, **kwargs) :
         super().create(request, *args, **kwargs)
@@ -63,7 +68,11 @@ class ReadFollowingPostView (ModelViewSet) :
 
     def list (self, request, *args, **kwargs) :
         data = []
-        followings = Follow.objects.filter(user_id=self.request.user)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+
+        followings = Follow.objects.filter(user_id=user)
 
         for following in followings :
             post = self.queryset.filter(owner=following.following_user_id)
@@ -105,7 +114,10 @@ class CreateCommentView (ModelViewSet) :
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
         post = Post.objects.get(pk=postId)
-        serializer.save(owner=self.request.user, post=post)
+        header = JWTTokenUserAuthentication.get_header(self, request=self.request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
+        serializer.save(owner=user, post=post)
 
     def get_queryset (self) :
         return super().get_queryset().filter(post=self.kwargs.get('post_id'))
@@ -178,35 +190,44 @@ class LikeView (APIView) :
         post = Post.objects.get(pk=post_id)
         serializer = LikeSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
 
         try :
-            like = Like.objects.get(post=post, liked_people=self.request.user)
+            like = Like.objects.get(post=post, liked_people=user)
 
         except Like.DoesNotExist :
-            serializer.save(liked_people=self.request.user, post=post)
+            serializer.save(liked_people=user, post=post)
             return Response({'success': '해당 게시글에 좋아요를 눌렀습니다.'}, status=200)
 
-        return Response({'message': ['이미 좋아요를 누른 게시물 입니다.']}, status=400)
+        return Response({'detail': '이미 좋아요를 누른 게시물 입니다.'}, status=400)
 
     def get (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
 
         try :
-            like = Like.objects.get(post=post, liked_people=self.request.user)
+            like = Like.objects.get(post=post, liked_people=user)
 
         except Like.DoesNotExist :
-            return Response({'message': ['좋아요 하지 않음.']}, status=400)
+            return Response({'detail': '좋아요 하지 않음.'}, status=400)
 
         return Response({'success': '좋아요함'}, status=200)
     
     def delete (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        user = CheckJWT.get_user(raw_token)
 
         try :
-            like = Like.objects.get(post=post, liked_people=self.request.user)
+            like = Like.objects.get(post=post, liked_people=user)
 
         except Like.DoesNotExist :
-            return Response({'message': ['해당 게시글에 좋아요 되어 있지 않습니다.']}, status=400)
+            return Response({'detail': '해당 게시글에 좋아요 되어 있지 않습니다.'}, status=400)
 
         like.delete()
 
