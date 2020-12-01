@@ -2,16 +2,16 @@ from .models import User, Follow
 from feed.models import Post
 from .permissions import IsFollower
 from .utils import Util
-from .serializers import customRegisterSerializer, customLoginSerializer, customTokenRefreshSerializer, userProfileSerializer, FollowersSerializer, FollowingSerializer
+from .serializers import *
 from feed.serializers import PostSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from django.urls import reverse
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 import jwt
@@ -46,39 +46,24 @@ class customLoginView (GenericAPIView) :
     def post (self, request) :
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        try :
-            user = User.objects.get(email=serializer.data['email'])
 
-        except User.DoesNotExist :
-            return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
-
-        if user.check_password(raw_password=serializer.data['password']) == False :
-            up = serializer.data['password'].upper()
-
-            if user.check_password(raw_password=up) == False :
-                down=serializer.data['password'].lower()
-                
-                if user.check_password(raw_password=down) == False :
-                    return Response({'message': ['이메일 또는 비밀번호를 확인해주세요.']}, status=401)
-
-        if not user.is_verified :
-            return Response({'message': ['이메일 인증을 먼저 해주세요.']}, status=401)
-
-        if not user.is_active :
-            return Response({'message': ['계정이 비활성화 되었습니다. 관리자에게 문의하세요.']}, status=401)
+        user = User.objects.get(email=serializer.data['email'])
 
         token = RefreshToken.for_user(user)
+        token['email'] = user.email
 
-        data = {
-            'token_type': 'Bearer',
-            'access_token': str(token.access_token),
-            'expires_at': str((datetime.now() + timedelta(minutes=30)).astimezone().replace(microsecond=0).isoformat()),
-            'refresh_token': str(token),
-            'refresh_token_expires_at': str((datetime.now() + timedelta(hours=8)).astimezone().replace(microsecond=0).isoformat())
-        }
+        user.refresh_token_expires_at = str((datetime.now() + timedelta(weeks=1)).astimezone().replace(microsecond=0).isoformat())
+        user.save(update_fields=('refresh_token_expires_at', ))
 
-        return Response(data, status=200)
+        data = {}
+
+        data['token_type'] = settings.SIMPLE_JWT['AUTH_HEADER_TYPES'][0]
+        data['access_token'] = str(token.access_token)
+        data['expires_at'] = str((datetime.now() + timedelta(minutes=30)).astimezone().replace(microsecond=0).isoformat())
+        data['refresh_token'] = str(token)
+        data['refresh_token_expires_at'] = user.refresh_token_expires_at
+
+        return Response(data)
 
 class customRefreshView (GenericAPIView) :
     serializer_class = customTokenRefreshSerializer
@@ -93,13 +78,13 @@ class customRefreshView (GenericAPIView) :
         except :
             return Response({'message': ['잘못된 refresh token 입니다.']}, status=401)
 
-        data = {
-            'token_type': 'Bearer',
-            'access_token': str(token.access_token),
-            'expires_at': str((datetime.now() + timedelta(minutes=30)).astimezone().replace(microsecond=0).isoformat()),
-            'refresh_token': str(token),
-            'refresh_token_expires_at': str((datetime.now() + timedelta(hours=8)).astimezone().replace(microsecond=0).isoformat())
-        }
+        data = {}
+
+        data['token_type'] = settings.SIMPLE_JWT['AUTH_HEADER_TYPES'][0]
+        data['access_token'] = str(token.access_token)
+        data['expires_at'] = str((datetime.now() + timedelta(minutes=30)).astimezone().replace(microsecond=0).isoformat())
+        data['refresh_token'] = str(token)
+        data['refresh_token_expires_at'] = user.refresh_token_expires_at
 
         return Response(data, status=200)
 
@@ -229,6 +214,10 @@ class MyProfileView (ModelViewSet) :
         queryset = User.objects.filter(email=self.request.user)
         serializer = self.serializer_class(queryset, many=True, context={'request': request})
 
+        header = JWTTokenUserAuthentication.get_header(self, request=request)
+        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
+        validated_token = JWTTokenUserAuthentication.get_validated_token(self, raw_token=raw_token)
+        user = JWTTokenUserAuthentication.get_user(self, validated_token=validated_token)
         return Response(serializer.data[0])
 
 class UserProfileView (ModelViewSet) :

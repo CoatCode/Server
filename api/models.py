@@ -53,6 +53,7 @@ class User (AbstractBaseUser, PermissionsMixin) :
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
+    refresh_token_expires_at = models.CharField(default='0', max_length=255)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'image', 'description']
