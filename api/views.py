@@ -80,7 +80,7 @@ class customRefreshView (GenericAPIView) :
         except :
             return Response({'detail': '잘못된 refresh token 입니다.'}, status=401)
 
-        user = CheckJWT.get_user(token)
+        user = CheckJWT.get_user(F'{token}')
 
         data = {}
 
