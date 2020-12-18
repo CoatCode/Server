@@ -3,7 +3,6 @@ from feed.models import Post
 from .permissions import IsFollower
 from .utils import Util
 from .serializers import *
-from .authentication import CheckJWT
 from feed.serializers import PostSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -30,7 +29,6 @@ class customSignUpView (GenericAPIView) :
         user = User.objects.get(email=serializer.data['email'])
 
         token = RefreshToken.for_user(user)
-        token['email'] = user.email
 
         current_site = get_current_site(request).domain
         relativeLink = reverse('emailVerify')
@@ -52,7 +50,6 @@ class customLoginView (GenericAPIView) :
         user = User.objects.get(email=serializer.data['email'])
 
         token = RefreshToken.for_user(user)
-        token['email'] = user.email
 
         user.refresh_token_expires_at = str((datetime.now() + timedelta(weeks=1)).astimezone().replace(microsecond=0).isoformat())
         user.save(update_fields=('refresh_token_expires_at', ))
@@ -80,7 +77,7 @@ class customRefreshView (GenericAPIView) :
         except :
             return Response({'detail': '잘못된 refresh token 입니다.'}, status=401)
 
-        user = CheckJWT.get_user(F'{token}')
+        user = User.objects.get(email=self.request.user)
 
         data = {}
 
@@ -98,7 +95,7 @@ class VerifyEmail (GenericAPIView) :
         token = request.GET.get('token')
 
         try :
-            user = CheckJWT.get_user(token)
+            user = User.objects.get(email=self.request.user)
 
             if not user.is_verified :
                 user.is_verified = True
@@ -163,9 +160,7 @@ class FollowView (APIView) :
     permission_classes = [IsAuthenticated]
 
     def post (self, request, user_id) :
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
 
         following_user = User.objects.get(pk=user_id)
 
@@ -184,9 +179,8 @@ class FollowView (APIView) :
         return Response({'detail': '이미 팔로우 한 유저입니다.'}, status=400)
 
     def get (self, request, user_id) :
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
+
         following_user = User.objects.get(pk=user_id)
 
         try :
@@ -199,9 +193,7 @@ class FollowView (APIView) :
 
     
     def delete (self, request, user_id) :
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
         following_user = User.objects.get(pk=user_id)
 
         try :
@@ -226,10 +218,7 @@ class MyProfileView (ModelViewSet) :
     serializer_class = userProfileSerializer
 
     def list (self, request) :
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
         serializer = self.serializer_class(user)
         
         return Response(serializer.data)
