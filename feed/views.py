@@ -1,7 +1,6 @@
 from .models import Post, Comment, Image, Like
 from api.models import User, Follow
 from api.serializers import userProfileSerializer
-from api.authentication import CheckJWT
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from .permissions import *
 from rest_framework.views import APIView
@@ -31,9 +30,7 @@ class CreatePostView (ModelViewSet) :
         return context
 
     def perform_create (self, serializer) :
-        header = JWTTokenUserAuthentication.get_header(self, request=self.request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
         serializer.save(owner=user)
 
     def create (self, request, *args, **kwargs) :
@@ -68,11 +65,7 @@ class ReadFollowingPostView (ModelViewSet) :
 
     def list (self, request, *args, **kwargs) :
         data = []
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
-
-        followings = Follow.objects.filter(user_id=user)
+        followings = Follow.objects.filter(user_id=self.request.user)
 
         for following in followings :
             post = self.queryset.filter(owner=following.following_user_id)
@@ -114,9 +107,7 @@ class CreateCommentView (ModelViewSet) :
     def perform_create (self, serializer) :
         postId = self.kwargs.get('post_id')
         post = Post.objects.get(pk=postId)
-        header = JWTTokenUserAuthentication.get_header(self, request=self.request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
         serializer.save(owner=user, post=post)
 
     def get_queryset (self) :
@@ -190,9 +181,7 @@ class LikeView (APIView) :
         post = Post.objects.get(pk=post_id)
         serializer = LikeSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
 
         try :
             like = Like.objects.get(post=post, liked_people=user)
@@ -205,9 +194,7 @@ class LikeView (APIView) :
 
     def get (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
 
         try :
             like = Like.objects.get(post=post, liked_people=user)
@@ -219,9 +206,7 @@ class LikeView (APIView) :
     
     def delete (self, request, post_id) :
         post = Post.objects.get(pk=post_id)
-        header = JWTTokenUserAuthentication.get_header(self, request=request)
-        raw_token = JWTTokenUserAuthentication.get_raw_token(self, header=header)
-        user = CheckJWT.get_user(raw_token)
+        user = User.objects.get(email=self.request.user)
 
         try :
             like = Like.objects.get(post=post, liked_people=user)
