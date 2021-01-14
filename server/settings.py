@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from datetime import datetime, timedelta
 import dj_database_url
+import json
+
+with open('../private.json', 'r') as f :
+    json_data = json.load(f)
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,12 +26,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = 't#h=&(-fm=82)-#5dlp$fdc^ohenn4luyg^v-@a9fvua3$9!q#'
+SECRET_KEY = json_data['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'coatcode.herokuapp.com']
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'api.User'
 
@@ -58,11 +63,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS':'rest_framework.schemas.coreapi.AutoSchema',
 }
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'hhodugv6q',
-    'API_KEY': '344363898916237',
-    'API_SECRET': '9V2A6TBkcTvrtUYqwPJBkUMeE6E',
-}
+CLOUDINARY_STORAGE = json_data['CLOUDINARY_STORAGE']
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
@@ -101,16 +102,7 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'coco',
-        'USER': 'admin',
-        'PASSWORD': 'kiop7777',
-        'HOST': '127.0.0.1',
-        'PORT': '5432'
-    }
-}
+DATABASES = json_data['DATABASES']
 
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
@@ -186,7 +178,7 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'teamdaedo'
 
-EMAIL_HOST_PASSWORD = 'daedo123'
+EMAIL_HOST_PASSWORD = json_data['EMAIL_HOST_PASSWORD']
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
