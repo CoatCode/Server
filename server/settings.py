@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import dj_database_url
 import json
 
-with open('../private.json', 'r') as f :
+with open('./private.json', 'r') as f :
     json_data = json.load(f)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'search',
     'corsheaders',
     'rest_framework',
-    'rest_framework.authtoken',
 ]
 
 REST_FRAMEWORK = {
@@ -157,6 +156,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 APPEND_SLASH = False
+
+SITE_ID = 2
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 

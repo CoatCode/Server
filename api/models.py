@@ -2,6 +2,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, Permi
 from django.db import models
 from django.utils import timezone
 from datetime import datetime
+import uuid
 
 class UserManager (BaseUserManager) :
     
@@ -64,8 +65,8 @@ class User (AbstractBaseUser, PermissionsMixin) :
         return self.email
         
 class Follow (models.Model) :
-    user_id = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE, null=True)
-    following_user_id = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE, null=True)
+    following_user = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta :

@@ -114,14 +114,14 @@ class FollowersView (ModelViewSet) :
     queryset = Follow.objects.all()
 
     def get_queryset (self) :
-        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
+        return super().get_queryset().filter(user=self.kwargs.get('user_id'))
 
     def list (self, request, *args, **kwargs) :
-        followers = self.queryset.filter(following_user_id=self.kwargs.get('user_id')).values()
+        followers = self.queryset.filter(following_user=self.kwargs.get('user_id')).values()
         data = []
 
         for follower in followers :
-            userId = follower.get('user_id_id')
+            userId = follower.get('user_id')
             user = User.objects.filter(pk=userId)
             serializer = self.serializer_class(user, many=True)
 
@@ -138,14 +138,14 @@ class FollowingsView (ModelViewSet) :
     queryset = Follow.objects.all()
 
     def get_queryset (self) :
-        return super().get_queryset().filter(user_id=self.kwargs.get('user_id'))
+        return super().get_queryset().filter(user=self.kwargs.get('user_id'))
 
     def list (self, request, *args, **kwargs) :
-        followers = self.queryset.filter(user_id=self.kwargs.get('user_id')).values()
+        followers = self.queryset.filter(user=self.kwargs.get('user_id')).values()
         data = []
 
         for follower in followers :
-            userId = follower.get('following_user_id_id')
+            userId = follower.get('following_user_id')
             user = User.objects.filter(pk=userId)
             serializer = self.serializer_class(user, many=True)
 
@@ -181,10 +181,10 @@ class FollowView (APIView) :
     def get (self, request, user_id) :
         user = User.objects.get(email=self.request.user)
 
-        following_user = User.objects.get(pk=user_id)
+        following_user = User.objects.get(id=user_id)
 
         try :
-            follow = Follow.objects.get(following_user_id=following_user, user_id=user)
+            follow = Follow.objects.get(following_user=following_user, user=user)
 
         except Follow.DoesNotExist :
             return Response({'detail': '팔로우하지 않음.'}, status=400)
@@ -234,4 +234,4 @@ class UserProfileView (ModelViewSet) :
             return Response(serializer.data[0])
 
         except IndexError :
-            return Response({'message': ['존재하지 않는 유저입니다.']}, status=400)
+            return Response({'detail': '존재하지 않는 유저입니다.'}, status=400)
